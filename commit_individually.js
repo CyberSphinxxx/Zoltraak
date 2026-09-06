@@ -3,158 +3,203 @@ const path = require('path');
 
 /**
  * List of files to commit individually, with tailored, unique commit messages.
- * Ordered logically from security/config -> core modules -> web dashboard -> integrations -> documentation -> script.
+ * Sequence: Core & Config -> Navigation & Social -> Combat & Clutches -> Logistics ->
+ * Commands & Loops -> Core & Web Server -> Web UI Styling -> Web UI JS Modules ->
+ * Launcher & Docs -> Script.
  */
 const commits = [
-  {
-    file: 'config.json',
-    action: 'untrack',
-    message: 'chore(security): untrack local config.json to safeguard private host and owner credentials'
-  },
-  {
-    file: '.gitignore',
-    action: 'add',
-    message: 'chore(git): ignore local config.json to prevent committing sensitive server credentials'
-  },
-  {
-    file: 'push_to_github.bat',
-    action: 'remove',
-    message: 'chore(scripts): remove push_to_github batch script in favor of manual push workflow'
-  },
-  {
-    file: 'requirements.txt',
-    action: 'add',
-    message: 'docs(env): update requirements.txt with runtime dependencies and ecosystem notes'
-  },
-  {
-    file: 'config.example.json',
-    action: 'add',
-    message: 'feat(config): expand config template with privacy, combat, navigation, and automation schemas'
-  },
+  // 1. Core Config & Chat
   {
     file: 'src/config.js',
-    action: 'add',
-    message: 'feat(config): implement deep merging, default fallbacks, and dashboard environment settings'
-  },
-  {
-    file: 'src/state.js',
-    action: 'add',
-    message: 'feat(state): extend bot state machine to support autonomous modules, patrol, and death tracking'
+    message: 'feat(config): add configuration schemas for MLG clutch, bridging, and multi-chest storage'
   },
   {
     file: 'src/utils/chat.js',
-    action: 'add',
-    message: 'feat(chat): implement multi-audience privacy routing, whitelist filter, and silent mode'
+    message: 'feat(chat): implement humanized typing delays, physical arm gestures, and anti-doxxing coords privacy'
   },
+  // 2. Navigation & Social Movement
   {
     file: 'src/modules/navigation.js',
-    action: 'add',
-    message: 'feat(nav): implement active anti-stuck watchdog, auto-jump assist, and goal tolerances'
+    message: 'feat(nav): enhance jump physics, horizontal collision recovery, and obstacle step assist'
   },
+  {
+    file: 'src/modules/social.js',
+    message: 'feat(social): add contextual interaction triggers, eye contact tracking, and natural idling'
+  },
+  // 3. Combat, Clutches, and Movement Mechanics
   {
     file: 'src/modules/combat.js',
-    action: 'add',
-    message: 'feat(combat): implement active shield projectile parrying and archer ranged kiting stance'
+    message: 'feat(combat): implement reactive neutral aggressor tracking, raycast visibility, and guard radius'
   },
   {
-    file: 'src/modules/survival.js',
-    action: 'add',
-    message: 'feat(survival): make auto-eat hunger threshold and totem emergency trigger configurable'
+    file: 'src/modules/clutch.js',
+    message: 'feat(clutch): implement autonomous water bucket MLG clutch to negate high-velocity fall damage'
   },
   {
-    file: 'src/modules/lumber.js',
-    action: 'add',
-    message: 'feat(lumber): add autonomous tree felling, vertical log harvesting, and sapling replanting'
+    file: 'src/modules/scaffold.js',
+    message: 'feat(scaffold): implement sneak-assisted auto-bridging and vertical scaffold towering'
   },
   {
-    file: 'src/modules/mining.js',
-    action: 'add',
-    message: 'feat(mining): add intelligent ore vein prospecting and 1x2 tunnel stripmining engine'
+    file: 'src/modules/dialogue.js',
+    message: 'feat(dialogue): add conversational intelligence with anti-interruption filter and 15s threading'
   },
+  // 4. Logistics, Storage & Maintenance
   {
-    file: 'src/modules/smelter.js',
-    action: 'add',
-    message: 'feat(smelter): implement automated furnace detection, ore cooking, and fuel loading'
-  },
-  {
-    file: 'src/modules/rancher.js',
-    action: 'add',
-    message: 'feat(rancher): implement livestock detection, selective animal breeding, and population caps'
-  },
-  {
-    file: 'src/modules/patrol.js',
-    action: 'add',
-    message: 'feat(patrol): add multi-waypoint sentry perimeter patrol navigation and route recording'
-  },
-  {
-    file: 'src/modules/crafting.js',
-    action: 'add',
-    message: 'feat(crafting): add autonomous workbench crafting engine and tool replenishment logic'
+    file: 'src/modules/chest.js',
+    message: 'feat(chest): implement multi-chest category storage registration and automated base inventory sorting'
   },
   {
     file: 'src/modules/courier.js',
-    action: 'add',
-    message: 'feat(courier): implement base chest inventory retrieval and direct item delivery to owner'
+    message: 'feat(courier): support multi-category chest searching for base item retrieval and delivery'
   },
   {
     file: 'src/modules/death.js',
-    action: 'add',
-    message: 'feat(death): add death coordinate logging, tombstone telemetry, and corpse retrieval routing'
+    message: 'feat(death): capture dimension metadata and expanded inventory snapshot upon player death'
   },
   {
-    file: 'src/modules/web/server.js',
-    action: 'add',
-    message: 'feat(web): build native HTTP server with Server-Sent Events telemetry and REST control API'
+    file: 'src/modules/farming.js',
+    message: 'perf(farming): optimize block scanning tolerances and farmland preservation checks'
   },
   {
-    file: 'public/index.html',
-    action: 'add',
-    message: 'feat(dashboard): create glassmorphic real-time web dashboard interface with command console'
+    file: 'src/modules/fishing.js',
+    message: 'feat(fishing): tune bobber splash sensitivity and automated recast cooldowns'
   },
+  // 5. Commands, Loops & Core Bot Factory
   {
-    file: 'public/dashboard.css',
-    action: 'add',
-    message: 'style(dashboard): design modern dark glassmorphism styling, responsive grid, and radar UI'
-  },
-  {
-    file: 'public/dashboard.js',
-    action: 'add',
-    message: 'feat(dashboard): implement real-time SSE client, canvas radar minimap, and control actions'
+    file: 'src/commands.js',
+    message: 'feat(commands): register chat commands for bridge, tower, clutch, setchest, listchests, and sortbase'
   },
   {
     file: 'src/loops.js',
-    action: 'add',
-    message: 'feat(loops): schedule periodic sentry patrol, shield intercept, lumber, and tool restock cycles'
-  },
-  {
-    file: 'src/commands.js',
-    action: 'add',
-    message: 'feat(commands): register chat commands for lumber, mining, smelting, ranching, crafting, and patrol'
+    message: 'feat(loops): schedule periodic background checks for MLG clutch readiness and active conversation decay'
   },
   {
     file: 'src/index.js',
-    action: 'add',
-    message: 'feat(core): bind web dashboard, death event handlers, context methods, and chat audit logging'
+    message: 'feat(core): initialize dialogue listeners, MLG clutch event hooks, and multi-category chest handlers'
   },
+  {
+    file: 'src/modules/web/server.js',
+    message: 'feat(web): add REST endpoints and SSE telemetry streams for sensory events and multi-chest data'
+  },
+  // 6. Web Dashboard Assets & Styling
+  {
+    file: 'public/zoltraak-logo.svg',
+    message: 'feat(dashboard): add custom SVG brand logo and visual emblem for Zoltraak companion'
+  },
+  {
+    file: 'public/css/base.css',
+    message: 'style(dashboard): define typography, CSS reset, and fundamental layout variables'
+  },
+  {
+    file: 'public/css/themes.css',
+    message: 'style(dashboard): create dark, cyberpunk, and enchanted theme palettes with CSS custom properties'
+  },
+  {
+    file: 'public/css/main.css',
+    message: 'style(dashboard): assemble modular stylesheets into master dashboard application stylesheet'
+  },
+  {
+    file: 'public/css/components/hud.css',
+    message: 'style(dashboard): style vitals HUD cards, heart/food status bars, and coordinates readout'
+  },
+  {
+    file: 'public/css/components/radar.css',
+    message: 'style(dashboard): style canvas radar minimap, compass rose, range sliders, and entity legend'
+  },
+  {
+    file: 'public/css/components/actions.css',
+    message: 'style(dashboard): style quick action buttons, command bar, and control grid layout'
+  },
+  {
+    file: 'public/css/components/sensory.css',
+    message: 'style(dashboard): style real-time sensory log feed and audit event cards'
+  },
+  {
+    file: 'public/css/components/settings.css',
+    message: 'style(dashboard): style configuration form controls, sliders, switches, and toggles'
+  },
+  {
+    file: 'public/css/components/toast.css',
+    message: 'style(dashboard): add animation keyframes and glassmorphic toast notification styling'
+  },
+  {
+    file: 'public/dashboard.css',
+    message: 'style(dashboard): update legacy dashboard stylesheet to support multi-chest and tactical widgets'
+  },
+  {
+    file: 'public/index.html',
+    message: 'feat(dashboard): update dashboard markup with multi-chest panels, clutch status, and modular links'
+  },
+  // 7. Web Dashboard JavaScript Modules
+  {
+    file: 'public/js/package.json',
+    message: 'feat(dashboard): declare ES module package configuration for client-side JavaScript architecture'
+  },
+  {
+    file: 'public/js/api.js',
+    message: 'feat(dashboard): implement HTTP REST API client for commands, chest management, and config'
+  },
+  {
+    file: 'public/js/theme.js',
+    message: 'feat(dashboard): implement dynamic theme switching controller with localStorage persistence'
+  },
+  {
+    file: 'public/js/ui/tabs.js',
+    message: 'feat(dashboard): implement accessible tab navigation switcher for dashboard views'
+  },
+  {
+    file: 'public/js/ui/toast.js',
+    message: 'feat(dashboard): create toast notification utility for status alerts and error reporting'
+  },
+  {
+    file: 'public/js/components/hud.js',
+    message: 'feat(dashboard): create vitals HUD component rendering dynamic health, food, and XYZ telemetry'
+  },
+  {
+    file: 'public/js/components/radar.js',
+    message: 'feat(dashboard): create interactive 2D canvas radar minimap with entity blips and heading cone'
+  },
+  {
+    file: 'public/js/components/actions.js',
+    message: 'feat(dashboard): create action panel controller for quick bot commands and mode dispatch'
+  },
+  {
+    file: 'public/js/components/sensory.js',
+    message: 'feat(dashboard): create sensory telemetry event logger for combat and interaction feeds'
+  },
+  {
+    file: 'public/js/components/settings.js',
+    message: 'feat(dashboard): create settings editor component binding live config values to REST API'
+  },
+  {
+    file: 'public/js/main.js',
+    message: 'feat(dashboard): create client entrypoint orchestrating SSE subscriptions and UI components'
+  },
+  {
+    file: 'public/dashboard.js',
+    message: 'feat(dashboard): update single-bundle client with multi-chest views, clutch toggles, and radar tweaks'
+  },
+  // 8. Launcher & Documentation
   {
     file: 'start_zoltraak.bat',
-    action: 'add',
-    message: 'chore(scripts): update startup launcher with npm fallback and automatic web dashboard launch'
+    message: 'chore(scripts): update startup launcher banner to Zoltraak Autonomous Tactical Companion'
   },
   {
-    file: 'CONTRIBUTING.md',
-    action: 'add',
-    message: 'docs(contributing): document autonomous modules, web dashboard architecture, and workflows'
+    file: 'FEATURES.md',
+    message: 'docs(features): add master catalog documenting all Zoltraak companion bot capabilities'
+  },
+  {
+    file: 'USER_GUIDE.md',
+    message: 'docs(guide): add comprehensive user guide detailing command manual, setup, and troubleshooting'
   },
   {
     file: 'README.md',
-    action: 'add',
-    message: 'docs(readme): update documentation with new autonomous modules, web dashboard, and commands'
+    message: 'docs(readme): update documentation with badges, bridging, clutch, multi-chest sorting, and guides'
   },
+  // 9. Self-commit
   {
     file: 'commit_individually.js',
-    action: 'add',
-    message: 'chore(scripts): add automated script to commit files individually with unique messages'
+    message: 'chore(scripts): update commit automation script with sequence for all 45 feature and module files'
   }
 ];
 
@@ -177,7 +222,7 @@ function runStrict(command) {
 }
 
 console.log('====================================================');
-console.log('🚀 Starting individual file commits...');
+console.log('🚀 Starting individual file commits (45 files)...');
 console.log('====================================================\n');
 
 let count = 0;
@@ -185,14 +230,7 @@ let count = 0;
 for (const entry of commits) {
   const normFile = entry.file.split('/').join(path.sep);
 
-  if (entry.action === 'untrack') {
-    // If tracked in index, untrack it
-    run(`git rm --cached "${normFile}"`);
-  } else if (entry.action === 'remove') {
-    run(`git rm "${normFile}"`);
-  } else {
-    run(`git add "${normFile}"`);
-  }
+  run(`git add "${normFile}"`);
 
   // Check if anything was actually staged for this file
   const staged = run('git diff --cached --name-only');
@@ -206,7 +244,7 @@ for (const entry of commits) {
 
   const lastCommit = runStrict('git log -1 --oneline');
   count++;
-  console.log(`[${count}] Committed: ${entry.file}`);
+  console.log(`[${count}/${commits.length}] Committed: ${entry.file}`);
   console.log(`    └─ ${lastCommit}\n`);
 }
 
@@ -216,7 +254,7 @@ if (remaining) {
   console.warn('⚠️ Remaining uncommitted changes:\n' + remaining);
 } else {
   console.log('====================================================');
-  console.log('🎉 All files successfully committed one by one!');
+  console.log(`🎉 All ${count} files successfully committed one by one!`);
   console.log('====================================================');
   console.log('Working tree is clean. Ready for manual git push.');
 }

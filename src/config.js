@@ -62,10 +62,10 @@ const DEFAULT_CONFIG = {
   dashboardPort: 3000,
   dashboardEnabled: true,
   privacy: {
-    audienceMode: 'whisper_only', // 'whisper_only' | 'whitelist_whisper' | 'public_chat'
+    audienceMode: 'dynamic', // 'dynamic' | 'whisper_only' | 'whitelist_whisper' | 'public_chat'
     whitelist: ['Owner'],
     silentMode: false,
-    botPrefix: '[Zoltraak]'
+    botPrefix: ''
   },
   combat: {
     targetPriority: 'hostiles_only', // 'hostiles_only' | 'all_mobs' | 'player_defense'
@@ -87,6 +87,14 @@ const DEFAULT_CONFIG = {
     mineBranchLength: 16,
     mineTorchSpacing: 6,
     breedLimit: 12
+  },
+  chat: {
+    naturalChat: true,
+    requireExplicitMention: true,
+    conversationThreadTimeout: 15000,
+    strangerSafeMode: true,
+    humanTypingDelay: true,
+    lookAtSpeaker: true
   }
 };
 

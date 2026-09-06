@@ -10,18 +10,21 @@ const { sendReply } = require('./utils/chat');
 
 const { setupMovements, performLifeLikeRoaming } = require('./modules/navigation');
 const { eatIfHungry, manageOffhandItems, trySleepInBed } = require('./modules/survival');
-const { checkPlayerShiftGreetings, lookAtNearbyPlayers } = require('./modules/social');
+const { checkPlayerShiftGreetings, lookAtNearbyPlayers, setupSocialListeners } = require('./modules/social');
 const {
   scanAndDefendAgainstMobs,
   performBodyguardLogic,
   equipBestWeapon,
   detectAndParryProjectiles,
   performArcherCombat,
-  raiseShield
+  raiseShield,
+  setupAggressorTracking
 } = require('./modules/combat');
 const { checkAndFarmCrops } = require('./modules/farming');
 const { startFishingLoop } = require('./modules/fishing');
-const { depositIntoChest, fetchToolFromChest, dropInventory } = require('./modules/chest');
+const { registerChest, listChests, sortBase, depositIntoChest, fetchToolFromChest, dropInventory } = require('./modules/chest');
+const { setupClutchListener, toggleClutch, isClutchEnabled } = require('./modules/clutch');
+const { bridge, tower } = require('./modules/scaffold');
 const { checkAndLumber } = require('./modules/lumber');
 const { mineTargetOre, digTunnel } = require('./modules/mining');
 const { operateSmelter } = require('./modules/smelter');
@@ -30,7 +33,8 @@ const { performPatrolStep, addPatrolWaypoint, clearPatrolWaypoints } = require('
 const { craftItem, autoReplenishTool } = require('./modules/crafting');
 const { deliverItemToOwner } = require('./modules/courier');
 const { handleDeath, recoverCorpse } = require('./modules/death');
-const { startWebServer, stopWebServer, addLog } = require('./modules/web/server');
+const { startWebServer, stopWebServer, addLog, addPerceptionLog } = require('./modules/web/server');
+const { handleDialogue } = require('./modules/dialogue');
 
 const { handleCommand } = require('./commands');
 const { startAutonomousLoops, stopAutonomousLoops } = require('./loops');
@@ -44,12 +48,22 @@ const ctx = {
   get state() { return state; },
   get config() { return config; },
   mcData: null,
-  sendReply: (text, isWhisper = true, minDelay = 300, maxDelay = 600) => {
-    addLog(config?.privacy?.audienceMode === 'public_chat' ? 'chat' : 'whisper', bot?.username || 'Zoltraak', text);
-    return sendReply(bot, config, text, isWhisper, minDelay, maxDelay);
+  addLog,
+  addPerceptionLog,
+  sendReply: (text, isWhisper = false, targetPlayerOrMinDelay = null, minDelayOrMaxDelay = 300, maybeMaxDelay = 600) => {
+    const isWhisperBool = !!isWhisper;
+    addLog(isWhisperBool ? 'whisper' : 'chat', bot?.username || 'Zoltraak', text);
+    return sendReply(bot, config, text, isWhisperBool, targetPlayerOrMinDelay, minDelayOrMaxDelay, maybeMaxDelay);
   },
   saveConfig: () => saveConfig(config),
+  registerChest: (category, isWhisper, targetPlayer) => registerChest(ctx, category, isWhisper, targetPlayer),
+  listChests: (isWhisper, targetPlayer) => listChests(ctx, isWhisper, targetPlayer),
+  sortBase: (isWhisper, targetPlayer) => sortBase(ctx, isWhisper, targetPlayer),
   depositIntoChest: () => depositIntoChest(ctx),
+  bridge: (length, dir, isWhisper, targetPlayer) => bridge(ctx, length, dir, isWhisper, targetPlayer),
+  tower: (height, isWhisper, targetPlayer) => tower(ctx, height, isWhisper, targetPlayer),
+  toggleClutch: (enabled) => toggleClutch(enabled),
+  isClutchEnabled: () => isClutchEnabled(),
   fetchToolFromChest: (toolName) => fetchToolFromChest(ctx, toolName),
   dropInventory: () => dropInventory(ctx),
   eatIfHungry: (force = false) => eatIfHungry(ctx, force),
@@ -65,7 +79,7 @@ const ctx = {
   performArcherCombat: () => performArcherCombat(ctx),
   raiseShield: (durationMs) => raiseShield(bot, durationMs),
   checkAndFarmCrops: (mcData) => checkAndFarmCrops(ctx, mcData || ctx.mcData),
-  startFishingLoop: (isWhisper) => startFishingLoop(ctx, isWhisper),
+  startFishingLoop: (isWhisper, targetPlayer) => startFishingLoop(ctx, isWhisper, targetPlayer),
   checkAndLumber: () => checkAndLumber(ctx),
   mineTargetOre: (oreQuery) => mineTargetOre(ctx, oreQuery),
   digTunnel: (steps) => digTunnel(ctx, steps),
@@ -76,9 +90,9 @@ const ctx = {
   clearPatrolWaypoints: () => clearPatrolWaypoints(ctx),
   craftItem: (itemName, count) => craftItem(ctx, itemName, count),
   autoReplenishTool: (toolType) => autoReplenishTool(ctx, toolType),
-  deliverItemToOwner: (itemName, count, isWhisper) => deliverItemToOwner(ctx, itemName, count, isWhisper),
+  deliverItemToOwner: (itemName, count, isWhisper, targetPlayer) => deliverItemToOwner(ctx, itemName, count, isWhisper, targetPlayer),
   handleDeath: () => handleDeath(ctx),
-  recoverCorpse: (isWhisper) => recoverCorpse(ctx, isWhisper)
+  recoverCorpse: (isWhisper, targetPlayer) => recoverCorpse(ctx, isWhisper, targetPlayer)
 };
 
 function createBot() {
@@ -110,6 +124,7 @@ function createBot() {
 
   bot.once('spawn', () => {
     console.log('[Zoltraak] Spawned in the world!');
+    addPerceptionLog('SENSORY', `Sensory cortex initialized. Visual perception online at [x: ${Math.round(bot.entity.position.x)}, y: ${Math.round(bot.entity.position.y)}, z: ${Math.round(bot.entity.position.z)}]`);
 
     if (!state.homePos) {
       state.setHome(bot.entity.position);
@@ -122,6 +137,7 @@ function createBot() {
     ctx.mcData = mcData;
 
     setupMovements(bot, mcData, config);
+    setupAggressorTracking(ctx); // Register reactive aggro event listeners
 
     // Setup mineflayer-auto-eat plugin
     bot.autoEat.setOpts({
@@ -142,6 +158,8 @@ function createBot() {
       bot.chat('/skin set Frieren');
     }, 2000);
 
+    setupClutchListener(ctx);
+    setupSocialListeners(ctx);
     startAutonomousLoops(ctx);
   });
 
@@ -157,30 +175,24 @@ function createBot() {
   bot.on('whisper', (username, message) => {
     if (username === bot.username) return;
     addLog('whisper', username, message);
-    handleCommand(ctx, username, message, true);
+
+    const handled = handleCommand(ctx, username, message, true);
+    if (!handled) {
+      handleDialogue(ctx, username, message, true);
+    }
   });
 
   bot.on('chat', (username, message) => {
     if (username === bot.username) return;
     addLog('chat', username, message);
 
-    const lower = message.trim().toLowerCase();
+    // 1. Check if message is a command (!cmd or addressed "zoltraak <cmd>")
+    // If it is a command, handleCommand executes it, whispers the reply to the sender, and returns true
+    const handled = handleCommand(ctx, username, message, false);
+    if (handled) return;
 
-    if (lower.includes('zoltraak') || lower === 'hi' || lower === 'yo' || lower === 'sup') {
-      if (lower.includes('zoltraak') || lower.includes('hi zoltraak') || lower.includes('yo zoltraak')) {
-        const isAuthorized = username === config.owner || (config.privacy?.whitelist && config.privacy.whitelist.includes(username));
-        if (isAuthorized) {
-          const casualReplies = ['yo', 'sup', 'hey', 'o/', 'hi'];
-          const reply = casualReplies[Math.floor(Math.random() * casualReplies.length)];
-          ctx.sendReply(reply, true);
-        }
-        return;
-      }
-    }
-
-    if (message.startsWith('!')) {
-      handleCommand(ctx, username, message, false);
-    }
+    // 2. Natural conversation handling with anti-interruption filter (replies in all-chat)
+    handleDialogue(ctx, username, message, false);
   });
 
   bot.on('sleep', () => {

@@ -39,6 +39,7 @@ function startAutonomousLoops(ctx) {
   // 3. Pro Combat & Self-Defense every 800ms
   const i2 = setInterval(() => {
     if (!bot || !bot.entity || state.isSleeping || !config.autoDefend) return;
+    if (state.currentState === 'ARCHER') return;
     ctx.scanAndDefendAgainstMobs();
   }, 800);
   activeIntervals.push(i2);
@@ -64,10 +65,37 @@ function startAutonomousLoops(ctx) {
   }, 3000);
   activeIntervals.push(i5);
 
-  // 7. Autonomous Farming Loop every 8 seconds
+  // 7. Reactive Shield Projectile Interceptor every 300ms
+  const iShield = setInterval(() => {
+    if (!bot || !bot.entity || state.isSleeping) return;
+    if (ctx.detectAndParryProjectiles) {
+      ctx.detectAndParryProjectiles();
+    }
+  }, 300);
+  activeIntervals.push(iShield);
+
+  // 8. Perimeter Patrol Sentry Loop every 2.5 seconds
+  const iPatrol = setInterval(() => {
+    if (!bot || !bot.entity || state.isSleeping || state.currentState !== 'PATROL') return;
+    if (ctx.performPatrolStep) {
+      ctx.performPatrolStep();
+    }
+  }, 2500);
+  activeIntervals.push(iPatrol);
+
+  // 9. Ranged Archer Combat Loop every 1.5 seconds
+  const iArcher = setInterval(() => {
+    if (!bot || !bot.entity || state.isSleeping || state.currentState !== 'ARCHER') return;
+    if (ctx.performArcherCombat) {
+      ctx.performArcherCombat();
+    }
+  }, 1500);
+  activeIntervals.push(iArcher);
+
+  // 10. Autonomous Farming Loop every 8 seconds
   const i6 = setInterval(() => {
     if (!bot || !bot.entity || state.isSleeping) return;
-    if (['COMBAT', 'DEPOSITING', 'GUARD', 'FISHING'].includes(state.currentState)) return;
+    if (['COMBAT', 'DEPOSITING', 'GUARD', 'FISHING', 'LUMBER', 'MINING', 'SMELTING', 'PATROL', 'ARCHER', 'COURIER'].includes(state.currentState)) return;
 
     if (config.autoFarm && (state.currentState === 'ROAM' || state.currentState === 'FARM')) {
       if (bot.inventory.emptySlotCount() <= 3 && (state.chestPos || config.chest)) {
@@ -79,7 +107,27 @@ function startAutonomousLoops(ctx) {
   }, 8000);
   activeIntervals.push(i6);
 
-  // 8. Natural Base Roaming every 12 seconds
+  // 11. Autonomous Lumberjack Loop every 5 seconds
+  const iLumber = setInterval(() => {
+    if (!bot || !bot.entity || state.isSleeping || state.currentState !== 'LUMBER') return;
+    if (bot.pathfinder && bot.pathfinder.isMoving()) return;
+    if (ctx.checkAndLumber) {
+      ctx.checkAndLumber();
+    }
+  }, 5000);
+  activeIntervals.push(iLumber);
+
+  // 12. Tool Replenishment Check every 20 seconds
+  const iTool = setInterval(() => {
+    if (!bot || !bot.entity || state.isSleeping) return;
+    if (['LUMBER', 'MINING', 'FARM'].includes(state.currentState) && ctx.autoReplenishTool) {
+      const toolType = state.currentState === 'LUMBER' ? 'axe' : state.currentState === 'MINING' ? 'pickaxe' : 'hoe';
+      ctx.autoReplenishTool(toolType);
+    }
+  }, 20000);
+  activeIntervals.push(iTool);
+
+  // 13. Natural Base Roaming every 12 seconds
   const i7 = setInterval(() => {
     if (!bot || !bot.entity || state.isSleeping || state.currentState !== 'ROAM') return;
     if (bot.pathfinder && bot.pathfinder.isMoving()) return;
@@ -87,7 +135,7 @@ function startAutonomousLoops(ctx) {
   }, 12000);
   activeIntervals.push(i7);
 
-  // 9. Social Eye Gaze every 3 seconds
+  // 14. Social Eye Gaze every 3 seconds
   const i8 = setInterval(() => {
     if (!bot || !bot.entity || state.isSleeping || (bot.pathfinder && bot.pathfinder.isMoving()) || state.currentState === 'FISHING') return;
     ctx.lookAtNearbyPlayers();

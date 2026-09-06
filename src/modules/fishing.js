@@ -1,7 +1,7 @@
 const { goals } = require('mineflayer-pathfinder');
 const { Vec3 } = require('vec3');
 
-async function startFishingLoop(ctx, isWhisper = false) {
+async function startFishingLoop(ctx, isWhisper = true, targetPlayer = null) {
   const { bot, state, config } = ctx;
   if (!bot || state.isFishing) return;
 
@@ -9,7 +9,7 @@ async function startFishingLoop(ctx, isWhisper = false) {
   if (!rod) {
     rod = await ctx.fetchToolFromChest('fishing_rod');
     if (!rod) {
-      if (bot.whisper) bot.whisper(config.owner, 'no fishing rod found');
+      ctx.sendReply('no fishing rod found', isWhisper, targetPlayer);
       state.currentState = 'ROAM';
       return;
     }
@@ -21,7 +21,7 @@ async function startFishingLoop(ctx, isWhisper = false) {
   });
 
   if (!waterBlock) {
-    if (bot.whisper) bot.whisper(config.owner, 'no water nearby to fish');
+    ctx.sendReply('no water nearby to fish', isWhisper, targetPlayer);
     state.currentState = 'ROAM';
     return;
   }

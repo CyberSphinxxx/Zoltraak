@@ -1,0 +1,18 @@
+services:
+  zoltraak:
+    build: .
+    container_name: zoltraak-bot
+    restart: unless-stopped
+    environment:
+      - MC_HOST=host.docker.internal
+      - MC_PORT=25565
+      - MC_USERNAME=Zoltraak
+      - MC_OWNER=YourMinecraftUsername
+      - MC_VERSION=1.21.2
+      - MC_AUTO_SLEEP=true
+      - MC_AUTO_DEFEND=true
+      - MC_AUTO_FARM=true
+    volumes:
+      - ./config.json:/app/config.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

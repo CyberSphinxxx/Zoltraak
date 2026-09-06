@@ -1,114 +1,172 @@
 const { execSync } = require('child_process');
 const path = require('path');
 
+/**
+ * List of files to commit individually, with tailored, unique commit messages.
+ * Ordered logically from security/config -> core modules -> web dashboard -> integrations -> documentation -> script.
+ */
 const commits = [
   {
+    file: 'config.json',
+    action: 'untrack',
+    message: 'chore(security): untrack local config.json to safeguard private host and owner credentials'
+  },
+  {
     file: '.gitignore',
-    message: 'chore(git): ignore local environment configs and secret override files'
+    action: 'add',
+    message: 'chore(git): ignore local config.json to prevent committing sensitive server credentials'
   },
   {
-    file: 'package.json',
-    message: 'chore(pkg): add dev watch script, repository links, and minecraft-data dependency'
-  },
-  {
-    file: 'package-lock.json',
-    message: 'chore(pkg): update package-lock with minecraft-data and subdependencies'
+    file: 'push_to_github.bat',
+    action: 'remove',
+    message: 'chore(scripts): remove push_to_github batch script in favor of manual push workflow'
   },
   {
     file: 'requirements.txt',
-    message: 'docs: add requirements and environment dependency specification'
+    action: 'add',
+    message: 'docs(env): update requirements.txt with runtime dependencies and ecosystem notes'
   },
   {
-    file: '.env.example',
-    message: 'chore(config): add environment variable template for bot settings'
-  },
-  {
-    file: '.vscode/launch.json',
-    message: 'chore(vscode): configure debug launch targets for development'
-  },
-  {
-    file: 'Dockerfile',
-    message: 'ci(docker): create multi-stage container image for isolated deployment'
-  },
-  {
-    file: 'docker-compose.yml',
-    message: 'ci(docker): add compose service configuration with environment binding'
+    file: 'config.example.json',
+    action: 'add',
+    message: 'feat(config): expand config template with privacy, combat, navigation, and automation schemas'
   },
   {
     file: 'src/config.js',
-    message: 'feat(config): implement centralized configuration loader with env overrides'
+    action: 'add',
+    message: 'feat(config): implement deep merging, default fallbacks, and dashboard environment settings'
   },
   {
     file: 'src/state.js',
-    message: 'feat(state): create state management class to track bot mode and targets'
+    action: 'add',
+    message: 'feat(state): extend bot state machine to support autonomous modules, patrol, and death tracking'
   },
   {
     file: 'src/utils/chat.js',
-    message: 'feat(utils): add humanized chat reply helper with randomized delay'
-  },
-  {
-    file: 'src/utils/block.js',
-    message: 'feat(utils): implement safe digging utility with timeout safeguard'
+    action: 'add',
+    message: 'feat(chat): implement multi-audience privacy routing, whitelist filter, and silent mode'
   },
   {
     file: 'src/modules/navigation.js',
-    message: 'feat(nav): add pathfinding navigation, movement, and following module'
-  },
-  {
-    file: 'src/modules/survival.js',
-    message: 'feat(survival): add health monitoring, hunger auto-eat, and night sleep module'
+    action: 'add',
+    message: 'feat(nav): implement active anti-stuck watchdog, auto-jump assist, and goal tolerances'
   },
   {
     file: 'src/modules/combat.js',
-    message: 'feat(combat): implement bodyguard threat detection and PvP defense module'
+    action: 'add',
+    message: 'feat(combat): implement active shield projectile parrying and archer ranged kiting stance'
   },
   {
-    file: 'src/modules/chest.js',
-    message: 'feat(chest): implement chest finding, deposit, and loot sorting module'
+    file: 'src/modules/survival.js',
+    action: 'add',
+    message: 'feat(survival): make auto-eat hunger threshold and totem emergency trigger configurable'
   },
   {
-    file: 'src/modules/farming.js',
-    message: 'feat(farming): implement automated crop harvesting and replanting module'
+    file: 'src/modules/lumber.js',
+    action: 'add',
+    message: 'feat(lumber): add autonomous tree felling, vertical log harvesting, and sapling replanting'
   },
   {
-    file: 'src/modules/fishing.js',
-    message: 'feat(fishing): implement autonomous fishing rod and catch cycle module'
+    file: 'src/modules/mining.js',
+    action: 'add',
+    message: 'feat(mining): add intelligent ore vein prospecting and 1x2 tunnel stripmining engine'
   },
   {
-    file: 'src/modules/social.js',
-    message: 'feat(social): add player greeting and shift-dance interaction module'
+    file: 'src/modules/smelter.js',
+    action: 'add',
+    message: 'feat(smelter): implement automated furnace detection, ore cooking, and fuel loading'
+  },
+  {
+    file: 'src/modules/rancher.js',
+    action: 'add',
+    message: 'feat(rancher): implement livestock detection, selective animal breeding, and population caps'
+  },
+  {
+    file: 'src/modules/patrol.js',
+    action: 'add',
+    message: 'feat(patrol): add multi-waypoint sentry perimeter patrol navigation and route recording'
+  },
+  {
+    file: 'src/modules/crafting.js',
+    action: 'add',
+    message: 'feat(crafting): add autonomous workbench crafting engine and tool replenishment logic'
+  },
+  {
+    file: 'src/modules/courier.js',
+    action: 'add',
+    message: 'feat(courier): implement base chest inventory retrieval and direct item delivery to owner'
+  },
+  {
+    file: 'src/modules/death.js',
+    action: 'add',
+    message: 'feat(death): add death coordinate logging, tombstone telemetry, and corpse retrieval routing'
+  },
+  {
+    file: 'src/modules/web/server.js',
+    action: 'add',
+    message: 'feat(web): build native HTTP server with Server-Sent Events telemetry and REST control API'
+  },
+  {
+    file: 'public/index.html',
+    action: 'add',
+    message: 'feat(dashboard): create glassmorphic real-time web dashboard interface with command console'
+  },
+  {
+    file: 'public/dashboard.css',
+    action: 'add',
+    message: 'style(dashboard): design modern dark glassmorphism styling, responsive grid, and radar UI'
+  },
+  {
+    file: 'public/dashboard.js',
+    action: 'add',
+    message: 'feat(dashboard): implement real-time SSE client, canvas radar minimap, and control actions'
   },
   {
     file: 'src/loops.js',
-    message: 'feat(loops): implement autonomous behavior schedulers and background intervals'
+    action: 'add',
+    message: 'feat(loops): schedule periodic sentry patrol, shield intercept, lumber, and tool restock cycles'
   },
   {
     file: 'src/commands.js',
-    message: 'feat(commands): implement chat command registry and owner dispatch system'
+    action: 'add',
+    message: 'feat(commands): register chat commands for lumber, mining, smelting, ranching, crafting, and patrol'
   },
   {
     file: 'src/index.js',
-    message: 'feat(core): implement bot initialization factory and event listener wiring'
+    action: 'add',
+    message: 'feat(core): bind web dashboard, death event handlers, context methods, and chat audit logging'
   },
   {
-    file: 'bot.js',
-    message: 'refactor(entry): simplify root entrypoint to bootstrap modular architecture'
+    file: 'start_zoltraak.bat',
+    action: 'add',
+    message: 'chore(scripts): update startup launcher with npm fallback and automatic web dashboard launch'
   },
   {
     file: 'CONTRIBUTING.md',
-    message: 'docs: add comprehensive contributor guide, code standards, and workflows'
+    action: 'add',
+    message: 'docs(contributing): document autonomous modules, web dashboard architecture, and workflows'
   },
   {
     file: 'README.md',
-    message: 'docs: update readme with modular architecture, features, and setup instructions'
+    action: 'add',
+    message: 'docs(readme): update documentation with new autonomous modules, web dashboard, and commands'
   },
   {
     file: 'commit_individually.js',
+    action: 'add',
     message: 'chore(scripts): add automated script to commit files individually with unique messages'
   }
 ];
 
 function run(command) {
+  try {
+    return execSync(command, { stdio: 'pipe', encoding: 'utf-8' }).trim();
+  } catch (err) {
+    return null;
+  }
+}
+
+function runStrict(command) {
   try {
     return execSync(command, { stdio: 'pipe', encoding: 'utf-8' }).trim();
   } catch (err) {
@@ -123,24 +181,33 @@ console.log('🚀 Starting individual file commits...');
 console.log('====================================================\n');
 
 let count = 0;
+
 for (const entry of commits) {
   const normFile = entry.file.split('/').join(path.sep);
-  
-  // Check if file has changes (either tracked modified or untracked)
-  const status = run(`git status --porcelain "${normFile}"`);
-  if (!status) {
-    console.log(`⏩ [Skipped] No changes detected in: ${entry.file}`);
+
+  if (entry.action === 'untrack') {
+    // If tracked in index, untrack it
+    run(`git rm --cached "${normFile}"`);
+  } else if (entry.action === 'remove') {
+    run(`git rm "${normFile}"`);
+  } else {
+    run(`git add "${normFile}"`);
+  }
+
+  // Check if anything was actually staged for this file
+  const staged = run('git diff --cached --name-only');
+  if (!staged) {
+    console.log(`⏩ [Skipped] No changes staged for: ${entry.file}`);
     continue;
   }
 
-  // Stage and commit file
-  run(`git add "${normFile}"`);
-  run(`git commit -m "${entry.message}"`);
-  
-  const lastCommit = run('git log -1 --oneline');
+  // Commit with the custom unique message
+  runStrict(`git commit -m "${entry.message}"`);
+
+  const lastCommit = runStrict('git log -1 --oneline');
   count++;
-  console.log(`[${count}/${commits.length}] Committed ${entry.file}`);
-  console.log(`   └─ ${lastCommit}\n`);
+  console.log(`[${count}] Committed: ${entry.file}`);
+  console.log(`    └─ ${lastCommit}\n`);
 }
 
 // Final status check
@@ -148,6 +215,8 @@ const remaining = run('git status --porcelain');
 if (remaining) {
   console.warn('⚠️ Remaining uncommitted changes:\n' + remaining);
 } else {
+  console.log('====================================================');
   console.log('🎉 All files successfully committed one by one!');
+  console.log('====================================================');
   console.log('Working tree is clean. Ready for manual git push.');
 }

@@ -6,9 +6,11 @@ const EDIBLE_FOODS = [
 ];
 
 async function eatIfHungry(ctx, force = false) {
-  const { bot } = ctx;
+  const { bot, config } = ctx;
   if (!bot || !bot.inventory) return;
-  if (!force && bot.food >= 18) return;
+
+  const threshold = config?.automation?.autoEatThreshold || 15;
+  if (!force && bot.food >= threshold) return;
   if (bot.autoEat && bot.autoEat.isEating) return;
 
   const foodItem = bot.inventory.items().find(i => EDIBLE_FOODS.includes(i.name));
@@ -22,13 +24,14 @@ async function eatIfHungry(ctx, force = false) {
 }
 
 async function manageOffhandItems(ctx) {
-  const { bot, state } = ctx;
+  const { bot, state, config } = ctx;
   if (!bot || !bot.inventory) return;
 
   const offhandItem = bot.inventory.slots[45];
 
+  const totemThreshold = config?.combat?.totemThreshold || 12;
   const totem = bot.inventory.items().find(i => i.name === 'totem_of_undying');
-  if (totem && (bot.health < 12 || state.currentState === 'COMBAT')) {
+  if (totem && (bot.health < totemThreshold || state.currentState === 'COMBAT')) {
     if (!offhandItem || offhandItem.name !== 'totem_of_undying') {
       try {
         await bot.equip(totem, 'off-hand');

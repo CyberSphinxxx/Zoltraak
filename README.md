@@ -1,39 +1,68 @@
-# 🧙‍♂️ Zoltraak - Autonomous Minecraft Companion Bot
+# Zoltraak - Autonomous Minecraft Companion Bot
 
 [![Node.js Version](https://img.shields.io/badge/node.js-v18%2B-green.svg)](https://nodejs.org/)
 [![Mineflayer](https://img.shields.io/badge/Mineflayer-4.38%2B-blue.svg)](https://github.com/PrismarineJS/mineflayer)
-[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.2-orange.svg)](https://minecraft.net/)
+[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.2+-orange.svg)](https://minecraft.net/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Contributing Guide](https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**Zoltraak** is an intelligent, human-like autonomous companion bot designed for modern Minecraft servers (`1.21.x`). Unlike basic AFK bots, Zoltraak interacts naturally with player mechanics, defends its owner, manages crop farms without trampling soil, catches fish autonomously, manages storage chests, and greets players using authentic community mannerisms.
+**Zoltraak** is an intelligent, human-like autonomous companion bot designed for modern Minecraft servers (`1.21.x`). Unlike basic AFK bots, Zoltraak interacts naturally with player mechanics, defends its owner, manages crop farms without trampling soil, catches fish autonomously, chops trees and replants saplings, digs branch mines, automates smelting furnaces, breeds livestock, craft tools on the fly, patrols base perimeters, and greets players using authentic community mannerisms.
 
 ---
 
 ## ✨ Features
 
-- **🤝 Authentic Shift-Greeting:** Detects when a nearby player crouches twice within 2.5 seconds and responds by locking eye gaze, double-crouching, and swinging its arm.
-- **🛡️ Dynamic Bodyguard & Escort (`guard`):** Follows the designated owner at a tight 3-block escort distance. Automatically targets, intercepts, and neutralizes hostile mobs that approach the owner. While the owner is stationary, Zoltraak faces outwards to watch their back.
-- **🌾 Infinite Crop Farming & Farmland-Safe Replanting (`farm`):**
-  - Uses native $O(1)$ block palette scans to locate mature crops (`wheat`, `carrots`, `potatoes`, `beetroots`) without freezing server keepalive packets.
-  - Harvests and replants from a 2-block reach distance to eliminate farmland trampling and player hitbox collisions.
-  - Automatically preserves at least 16 carrots, 16 potatoes, and 32 seeds in its inventory for eating and continuous farming.
-- **🎣 Autonomous AFK Fishing (`fish`):** Locates water bodies, casts a fishing rod, detects bite splashes, and deposits caught fish, enchanted books, and treasures when full.
-- **📦 Smart Base Chest Auto-Deposit (`deposit`):** Safely travels to registered base chests (`setchest`), deposits mob drops and farm yields, and rests.
-- **🔨 Automatic Tool Restocking:** When tools or weapons break or run out, Zoltraak visits the base chest and restocks appropriate replacements.
-- **🍗 Active Food Consumption & Anti-Starvation:** Continuously eats stored food (`carrots`, `bread`, `cooked salmon`, `golden carrots`) when hunger drops below 18. Dynamically disables sprinting when starved to prevent sprint-particle lockups.
-- **🛌 Bed Sleeping & Night Patrol (`sleep`):** Automatically seeks out and sleeps in nearby beds during thunderstorms or night time.
-- **⚔️ Tactical Combat & Shield Parrying:** Equips highest-tier weapons, blocks incoming skeleton arrows with offhand shields, switches to Totems of Undying when low on health, and tactically retreats from charging creepers.
-- **🤫 Discreet Whisper-Only Control:** Controlled entirely through private in-game whispers (`/msg Zoltraak <cmd>`), keeping public chat clean. Only responds to its designated owner.
+### 🪓 Resource Gathering & Automation
+- **🌲 Auto-Lumberjack & Replanting (`lumber`, `chop`):** Scans for nearby trees (oak, birch, spruce, jungle, acacia, dark oak, cherry, mangrove), equips the highest-tier axe, chops the tree trunk from bottom to top, collects drops, and replants saplings back onto the dirt stump.
+- **⛏️ Smart Ore Miner & Branch Miner (`mine <ore>`, `tunnel`):**
+  - Targets specific ores (`coal`, `iron`, `gold`, `diamond`, `lapis`, `copper`, `redstone`, `debris`) with pickaxes matching harvest hardness tiers.
+  - Excavates safe 1×2 branch mines (`tunnel 8`), checks for overhead falling gravel or lava fluids, and places illumination torches when light levels drop below 7.
+- **🔥 Auto-Smelter & Furnace Helper (`smelt`):** Locates nearby furnaces, blast furnaces, or smokers. Automatically extracts smelted ingots/food, loads fuel (`coal`, `charcoal`, `blaze rods`, `planks`), and inputs raw ores or raw meat.
+- **🐑 Animal Breeder & Rancher (`breed`):** Detects nearby adult cows, sheep, chickens, and pigs, equips the corresponding feed (`wheat`, `seeds`, `carrots`), and feeds pairs to produce offspring.
+
+### ⚔️ Advanced Combat & Tactical Defense
+- **🛡️ Shield Reflexes & Projectile Parrying:** Detects incoming projectiles (`arrows`, `tridents`, `fireballs`, `wind charges`) within 10 blocks, instantly turns to face the incoming threat, and raises its off-hand shield to parry.
+- **💥 Creeper Blast Deflection:** Tactically sprints backward and raises its shield when creepers ignite or tick within 6 blocks.
+- **🏹 Ranged Archer Mode (`archer`, `snipe`):** Equips bows or crossbows, kites hostiles by maintaining a safe 7–15 block distance, compensates for projectile gravitational drop, charges, and snipes enemies from afar.
+- **🏰 Perimeter Patrol & Sentry Radar (`patrol`, `sentry`):**
+  - Continuously walks sequential custom waypoints or generates an autonomous 4-corner perimeter around home.
+  - Features an active sentry radar: sounds chat alerts and intercepts any hostile mob that breaches the perimeter.
+- **🔮 Totem of Undying Quick-Swap:** Automatically equips a Totem of Undying in the off-hand if health falls below 12 HP.
+
+### 🛠️ Survival Quality of Life
+- **🔨 In-Field Auto-Crafter & Tool Replenisher (`craft <item>`):**
+  - Resolves crafting recipes in player 2×2 inventory or navigates to a workbench for 3×3 table recipes.
+  - If pickaxes, axes, or swords break during tasks, Zoltraak autonomously crafts replacements on the fly.
+- **📦 Courier Item Delivery (`bring <item> [count]`):**
+  - Withdraws requested materials from base chests and navigates to the owner's exact live coordinates.
+  - Drops items directly at the owner's feet with a whisper notification.
+- **💀 Death Marker & Corpse Retriever (`recover`):**
+  - Hooks player death events, logs exact XYZ coordinates, dimension, timestamp, and an inventory manifest, alerting the owner immediately.
+  - Command `!recover` directs Zoltraak to pathfind to the death marker, vacuum dropped items, and re-equip recovered armor and weapons.
+
+### 🤝 Companion & Base Automation
+- **🤝 Authentic Shift-Greeting:** Detects player double-crouches within 2.5s and responds by locking eye gaze, double-crouching, and swinging its arm.
+- **🛡️ Bodyguard Escort (`guard`):** Follows at a tight 3-block distance, watches the owner's back when stationary, and neutralizes incoming threats.
+- **🌾 Infinite Crop Farming (`farm`):** Uses $O(1)$ block palette scans to harvest and replant mature crops (`wheat`, `carrots`, `potatoes`, `beetroots`) without trampling farmland.
+- **🎣 Autonomous Fishing (`fish`):** Locates water bodies, casts fishing rods, detects bite splashes, and catches fish and treasure.
+- **🍗 Anti-Starvation Auto-Eat:** Continuously consumes stored food when hunger drops below 18.
+- **🛌 Bed Sleeping (`sleep`):** Automatically seeks out and sleeps in nearby beds during thunderstorms or night time.
+
+### 🌐 Web Dashboard & Live Visualization
+- **🧭 2D Tactical Radar Minimap:** Smooth Canvas-based top-down radar with dynamic range scaling (16m, 24m, 36m), view angle direction cone, player username tags, hostile mob blips, dropped items, base chest markers, and patrol waypoint trails.
+- **📊 Real-Time Vitals & Coordinates HUD:** Live animated health hearts, hunger/saturation levels, dimension indicators, and X/Y/Z coordinates with 1-click clipboard copy.
+- **🎒 Interactive Minecraft Inventory Grid:** Full visualizer for 4 armor slots, off-hand slot, 27 main inventory slots, and 9 hotbar slots with item count badges and hover tooltips.
+- **⚡ One-Click Action Control Center:** Instant command buttons to switch Zoltraak into any behavior (`Guard`, `Farm`, `Lumber`, `Mine`, `Fish`, `Patrol`, `Archer`, `Smelt`, `Breed`, `Deposit`, `Sleep`, `Stop`).
+- **💬 In-Browser Live Chat & Command Console:** Streams in-game chat, whispers, and system logs in real time with an interactive input bar to dispatch commands directly from your browser.
+- **🚀 Zero Extra Dependencies:** Built natively on Node.js core `http` and Server-Sent Events (SSE) on `http://localhost:3000`.
 
 ---
 
 ## 🚀 Quickstart
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) (version 18 or higher recommended) & npm
+- [Node.js](https://nodejs.org/) (`v18.0.0` or higher) & npm
 - A Minecraft Server (`Paper`, `Purpur`, `Spigot`, or `Fabric`) supporting Minecraft `1.21.x`
-- *(Coming from Python? See [requirements.txt](requirements.txt) for a quick command and package comparison)*
 
 ### Installation
 
@@ -49,7 +78,6 @@
    ```
 
 3. **Configure the bot:**
-   Zoltraak will automatically generate `config.json` from `config.example.json` on first run. You can also copy it manually:
    ```bash
    cp config.example.json config.json
    ```
@@ -67,7 +95,6 @@
      "autoFarm": true
    }
    ```
-   *(Or configure via environment variables with `.env` — see [.env.example](.env.example))*
 
 4. **Start Zoltraak:**
    ```bash
@@ -77,7 +104,6 @@
    # Development mode (auto-reloads on file changes)
    npm run dev
    ```
-   *(On Windows, you can also double-click `start_zoltraak.bat`)*
 
 ### 🐳 Running with Docker
 ```bash
@@ -86,43 +112,75 @@ docker compose up -d
 
 ---
 
-## 🍴 Forking & Modifying Zoltraak
-
-Looking to build custom behaviors or add custom commands? Zoltraak is designed to be completely modular:
-- Check out **[CONTRIBUTING.md](CONTRIBUTING.md)** for a full architecture breakdown and step-by-step tutorials:
-  - 📖 **[How to add a new in-game command](CONTRIBUTING.md#tutorial-1-adding-a-new-in-game-command)**
-  - 🤖 **[How to build a new autonomous behavior](CONTRIBUTING.md#tutorial-2-creating-a-new-autonomous-behavior-module)**
-  - 🐞 **One-click VS Code Debugging** via `.vscode/launch.json` (press `F5` to debug)
-
----
-
 ## 💬 Command Reference
 
-All commands can be sent privately via `/msg Zoltraak <command>` or `/tell Zoltraak <command>`:
+All commands can be sent privately via `/msg Zoltraak <command>` or publicly via `!<command>`:
 
-| Command | Description |
-| :--- | :--- |
-| `guard` / `bodyguard` | Follows within 3 blocks, shields your back, and intercepts hostiles. |
-| `farm` | Scans for mature crops, harvests them, replants, and deposits excess yields. |
-| `fish` | Travels to nearby water, casts fishing rod, and reels in fish and treasures. |
-| `roam` | Naturally wanders and patrols the base anchor area. |
-| `follow` / `come` | Follows the owner directly. |
-| `stay` / `stop` | Halts all movement and combat immediately. |
-| `setchest` | Registers the container (chest, barrel, shulker) you are standing next to. |
-| `deposit` | Walks to the registered chest and deposits excess loot and crops. |
-| `sethome` | Updates home anchor coordinates to current position. |
-| `eat` | Forces the bot to consume food from inventory. |
-| `sleep` | Locates the nearest bed and sleeps through the night. |
-| `drop` | Empties inventory on the ground for the owner. |
-| `status` | Privately reports HP, hunger points, and current active state. |
+| Command | Arguments | Description |
+| :--- | :--- | :--- |
+| `guard` | — | Follows within 3 blocks, shields your back, and intercepts hostiles. |
+| `archer` | — | Equips bow/crossbow and kiting combat stance for ranged sniping. |
+| `patrol` | — | Starts sentry perimeter patrol around home or custom waypoints. |
+| `addpatrol` | — | Adds current coordinates as a sentry waypoint. |
+| `clearpatrol` | — | Clears all custom patrol waypoints. |
+| `lumber` / `chop` | — | Locates trees, chops trunks from bottom-up, and replants saplings. |
+| `mine` | `[ore_name]` | Searches and mines veins of coal, iron, gold, diamond, or debris. |
+| `tunnel` | `[steps]` | Excavates a safe 1×2 branch mine with fluid checks and torches. |
+| `smelt` | — | Opens furnace, loads fuels and smeltable ores/food, collects ingots. |
+| `breed` | `[species]` | Feeds pairs of cows, sheep, pigs, or chickens to breed offspring. |
+| `craft` | `<item> [count]` | Crafts specified items using 2×2 grid or nearby crafting table. |
+| `bring` | `<item> [count]` | Fetches item from base storage and delivers directly to owner. |
+| `recover` | — | Pathfinds back to death coordinates to retrieve dropped gear. |
+| `farm` | — | Scans for mature crops, harvests, replants, and deposits excess yields. |
+| `fish` | — | Travels to nearby water, casts fishing rod, and reels in fish and treasures. |
+| `setchest` | — | Registers the container (chest, barrel, shulker) you are standing next to. |
+| `deposit` | — | Walks to the registered chest and deposits excess loot and crops. |
+| `sethome` | — | Updates home anchor coordinates to current position. |
+| `follow` | — | Follows the owner directly. |
+| `stay` / `stop` | — | Halts all movement and actions immediately. |
+| `roam` | — | Naturally wanders and patrols the base anchor area. |
+| `eat` | — | Forces the bot to consume food from inventory. |
+| `sleep` | — | Locates the nearest bed and sleeps through the night. |
+| `drop` | — | Empties inventory on the ground for the owner. |
+| `status` | — | Privately reports HP, hunger points, active mode, and patrol status. |
 
 ---
 
-## 🛠️ Architecture & Hardening
+## 🛠️ Modular Architecture
 
-- **Keepalive Timeout Prevention:** Full 32-block cube scans are replaced with native block ID palette lookups (`findBlocks`), reducing CPU scan time from ~30s down to <1ms.
-- **Digging Timeout Wrapper:** All block destruction is wrapped in an asynchronous promise timeout to prevent bot freezes inside GriefPrevention claims or laggy network states.
-- **Anti-Spam Pre-Movement Bypass:** Performs a micro-displacement jump on spawn to satisfy anti-bot and anti-spam verification plugins.
+```
+public/                 # Live Web Dashboard frontend
+├── index.html          # Glassmorphic cyber-fantasy dashboard UI
+├── dashboard.css       # Design system & animations
+└── dashboard.js        # Canvas radar, SSE client & telemetry rendering
+src/
+├── index.js            # Bot lifecycle, Mineflayer plugins, shared context (ctx)
+├── config.js           # Configuration loader with env variable support
+├── state.js            # BotState model (tracking active states & coordinates)
+├── commands.js         # Chat & whisper command parser
+├── loops.js            # Autonomous background intervals (farming, defense, roaming)
+├── modules/            # Autonomous feature modules
+│   ├── web/
+│   │   └── server.js   # Native HTTP server with SSE telemetry & command API
+│   ├── lumber.js       # Auto-lumberjack & sapling replanter
+│   ├── mining.js       # Smart ore vein miner & branch tunnel excavator
+│   ├── smelter.js      # Furnace automation & auto-smelting
+│   ├── rancher.js      # Animal breeding & livestock management
+│   ├── combat.js       # Shield reflexes, archer kiting, bodyguard escort
+│   ├── patrol.js       # Perimeter sentry radar & waypoint walking
+│   ├── crafting.js     # Auto-crafter & autonomous tool replenisher
+│   ├── courier.js      # Base chest item retrieval & owner delivery
+│   ├── death.js        # Death marker logging & corpse retrieval
+│   ├── farming.js      # Farmland-safe crop harvesting, replanting, O(1) scans
+│   ├── fishing.js      # Water detection, bobber casting, bite splash detection
+│   ├── chest.js        # Base chest deposits, item restocking, inventory drops
+│   ├── navigation.js   # Movement setup, stuck detection, lifelike roaming
+│   ├── social.js       # Shift-greeting recognition & head tracking
+│   └── survival.js     # Food consumption, off-hand totem/shield, bed sleeping
+└── utils/              # Helper utilities
+    ├── block.js        # Safe block mining with timeout protection
+    └── chat.js         # Humanized chat delays & whisper replies
+```
 
 ---
 

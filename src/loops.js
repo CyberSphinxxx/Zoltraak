@@ -1,3 +1,5 @@
+const { stopGuardFollow } = require('./modules/navigation');
+
 let activeIntervals = [];
 
 function stopAutonomousLoops() {
@@ -5,6 +7,7 @@ function stopAutonomousLoops() {
     clearInterval(interval);
   }
   activeIntervals = [];
+  stopGuardFollow(); // Always kill guard follow on full loop stop
 }
 
 function startAutonomousLoops(ctx) {
@@ -51,11 +54,11 @@ function startAutonomousLoops(ctx) {
   }, 1000);
   activeIntervals.push(i3);
 
-  // 5. Shift-Greeting Detection every 500ms
+  // 5. Shift-Greeting Detection loop every 100ms (rapid responsiveness)
   const i4 = setInterval(() => {
     if (!bot || !bot.entity || state.isSleeping) return;
     ctx.checkPlayerShiftGreetings();
-  }, 500);
+  }, 100);
   activeIntervals.push(i4);
 
   // 6. Offhand & Shield / Totem Manager every 3 seconds

@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Zoltraak",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/bot.js",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Zoltraak (Watch Mode)",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/bot.js",
+      "runtimeArgs": ["--watch"],
+      "console": "integratedTerminal"
+    }
+  ]
+}

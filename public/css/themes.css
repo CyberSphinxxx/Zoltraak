@@ -1,0 +1,203 @@
+/* ==========================================================================
+   Zoltraak Theme System
+   Design Tokens & Palette Definitions for 6 Cyber-Arcane Themes
+   ========================================================================== */
+
+/* 1. Theme: Arcane Cyber (Default) */
+:root,
+[data-theme="arcane"] {
+  --theme-name: "Arcane Cyber";
+  --bg-body: #070b14;
+  --bg-header: rgba(11, 16, 29, 0.95);
+  --bg-card: rgba(13, 20, 36, 0.7);
+  --bg-card-hover: rgba(18, 28, 50, 0.85);
+  --border-glass: rgba(0, 242, 254, 0.15);
+  --border-glass-hover: rgba(0, 242, 254, 0.35);
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  --primary-accent: #00f2fe;
+  --primary-glow: rgba(0, 242, 254, 0.4);
+  --primary-glow-subtle: rgba(0, 242, 254, 0.15);
+  --secondary-accent: #9d4edd;
+  --secondary-glow: rgba(157, 78, 221, 0.35);
+
+  --brand-gradient: linear-gradient(90deg, #ffffff, #00f2fe);
+  --tab-active-gradient: linear-gradient(180deg, rgba(0, 242, 254, 0.04) 0%, rgba(0, 242, 254, 0.12) 100%);
+  --intro-icon-gradient: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(157, 78, 221, 0.2));
+
+  /* Radar Canvas Colors */
+  --radar-bg: #0a1020;
+  --radar-border: rgba(0, 242, 254, 0.3);
+  --radar-ring: rgba(255, 255, 255, 0.08);
+  --radar-cone-start: rgba(0, 242, 254, 0.35);
+  --radar-bot: #00f2fe;
+
+  /* Global Fixed Semantics */
+  --health-red: #ff3366;
+  --food-amber: #f59e0b;
+  --emerald: #10b981;
+  --gold: #ffcc00;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+}
+
+/* 2. Theme: Rose Quartz */
+[data-theme="rose"] {
+  --theme-name: "Rose Quartz";
+  --bg-body: #120914;
+  --bg-header: rgba(24, 13, 28, 0.95);
+  --bg-card: rgba(30, 16, 36, 0.7);
+  --bg-card-hover: rgba(42, 22, 50, 0.85);
+  --border-glass: rgba(251, 113, 133, 0.18);
+  --border-glass-hover: rgba(251, 113, 133, 0.4);
+
+  --text-main: #fff1f2;
+  --text-muted: #fda4af;
+  --text-dim: #9f1239;
+
+  --primary-accent: #fb7185;
+  --primary-glow: rgba(251, 113, 133, 0.45);
+  --primary-glow-subtle: rgba(251, 113, 133, 0.15);
+  --secondary-accent: #e11d48;
+  --secondary-glow: rgba(225, 29, 72, 0.4);
+
+  --brand-gradient: linear-gradient(90deg, #ffffff, #fb7185);
+  --tab-active-gradient: linear-gradient(180deg, rgba(251, 113, 133, 0.04) 0%, rgba(251, 113, 133, 0.14) 100%);
+  --intro-icon-gradient: linear-gradient(135deg, rgba(251, 113, 133, 0.18), rgba(225, 29, 72, 0.22));
+
+  --radar-bg: #160c19;
+  --radar-border: rgba(251, 113, 133, 0.35);
+  --radar-ring: rgba(251, 113, 133, 0.1);
+  --radar-cone-start: rgba(251, 113, 133, 0.35);
+  --radar-bot: #fb7185;
+}
+
+/* 3. Theme: Emerald Forest */
+[data-theme="forest"] {
+  --theme-name: "Emerald Forest";
+  --bg-body: #06140e;
+  --bg-header: rgba(10, 26, 18, 0.95);
+  --bg-card: rgba(12, 34, 24, 0.7);
+  --bg-card-hover: rgba(18, 48, 34, 0.85);
+  --border-glass: rgba(16, 185, 129, 0.18);
+  --border-glass-hover: rgba(16, 185, 129, 0.4);
+
+  --text-main: #ecfdf5;
+  --text-muted: #a7f3d0;
+  --text-dim: #047857;
+
+  --primary-accent: #10b981;
+  --primary-glow: rgba(16, 185, 129, 0.45);
+  --primary-glow-subtle: rgba(16, 185, 129, 0.15);
+  --secondary-accent: #34d399;
+  --secondary-glow: rgba(52, 211, 153, 0.35);
+
+  --brand-gradient: linear-gradient(90deg, #ffffff, #10b981);
+  --tab-active-gradient: linear-gradient(180deg, rgba(16, 185, 129, 0.04) 0%, rgba(16, 185, 129, 0.14) 100%);
+  --intro-icon-gradient: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(52, 211, 153, 0.22));
+
+  --radar-bg: #091a13;
+  --radar-border: rgba(16, 185, 129, 0.35);
+  --radar-ring: rgba(16, 185, 129, 0.1);
+  --radar-cone-start: rgba(16, 185, 129, 0.35);
+  --radar-bot: #10b981;
+}
+
+/* 4. Theme: Abyssal Ocean */
+[data-theme="ocean"] {
+  --theme-name: "Abyssal Ocean";
+  --bg-body: #05101e;
+  --bg-header: rgba(7, 20, 38, 0.95);
+  --bg-card: rgba(10, 28, 54, 0.7);
+  --bg-card-hover: rgba(14, 40, 76, 0.85);
+  --border-glass: rgba(56, 189, 248, 0.18);
+  --border-glass-hover: rgba(56, 189, 248, 0.4);
+
+  --text-main: #f0f9ff;
+  --text-muted: #bae6fd;
+  --text-dim: #0369a1;
+
+  --primary-accent: #38bdf8;
+  --primary-glow: rgba(56, 189, 248, 0.45);
+  --primary-glow-subtle: rgba(56, 189, 248, 0.15);
+  --secondary-accent: #2563eb;
+  --secondary-glow: rgba(37, 99, 235, 0.35);
+
+  --brand-gradient: linear-gradient(90deg, #ffffff, #38bdf8);
+  --tab-active-gradient: linear-gradient(180deg, rgba(56, 189, 248, 0.04) 0%, rgba(56, 189, 248, 0.14) 100%);
+  --intro-icon-gradient: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(37, 99, 235, 0.22));
+
+  --radar-bg: #071529;
+  --radar-border: rgba(56, 189, 248, 0.35);
+  --radar-ring: rgba(56, 189, 248, 0.1);
+  --radar-cone-start: rgba(56, 189, 248, 0.35);
+  --radar-bot: #38bdf8;
+}
+
+/* 5. Theme: Solar Amber */
+[data-theme="solar"] {
+  --theme-name: "Solar Amber";
+  --bg-body: #140f06;
+  --bg-header: rgba(28, 20, 8, 0.95);
+  --bg-card: rgba(38, 28, 12, 0.7);
+  --bg-card-hover: rgba(52, 38, 16, 0.85);
+  --border-glass: rgba(251, 191, 36, 0.18);
+  --border-glass-hover: rgba(251, 191, 36, 0.4);
+
+  --text-main: #fffbeb;
+  --text-muted: #fde68a;
+  --text-dim: #b45309;
+
+  --primary-accent: #fbbf24;
+  --primary-glow: rgba(251, 191, 36, 0.45);
+  --primary-glow-subtle: rgba(251, 191, 36, 0.15);
+  --secondary-accent: #f59e0b;
+  --secondary-glow: rgba(245, 158, 11, 0.35);
+
+  --brand-gradient: linear-gradient(90deg, #ffffff, #fbbf24);
+  --tab-active-gradient: linear-gradient(180deg, rgba(251, 191, 36, 0.04) 0%, rgba(251, 191, 36, 0.14) 100%);
+  --intro-icon-gradient: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(245, 158, 11, 0.22));
+
+  --radar-bg: #1a1409;
+  --radar-border: rgba(251, 191, 36, 0.35);
+  --radar-ring: rgba(251, 191, 36, 0.1);
+  --radar-cone-start: rgba(251, 191, 36, 0.35);
+  --radar-bot: #fbbf24;
+}
+
+/* 6. Theme: Void Amethyst */
+[data-theme="amethyst"] {
+  --theme-name: "Void Amethyst";
+  --bg-body: #0e0717;
+  --bg-header: rgba(18, 10, 30, 0.95);
+  --bg-card: rgba(26, 14, 44, 0.7);
+  --bg-card-hover: rgba(36, 20, 60, 0.85);
+  --border-glass: rgba(192, 132, 252, 0.18);
+  --border-glass-hover: rgba(192, 132, 252, 0.4);
+
+  --text-main: #faf5ff;
+  --text-muted: #e9d5ff;
+  --text-dim: #7e22ce;
+
+  --primary-accent: #c084fc;
+  --primary-glow: rgba(192, 132, 252, 0.45);
+  --primary-glow-subtle: rgba(192, 132, 252, 0.15);
+  --secondary-accent: #a855f7;
+  --secondary-glow: rgba(168, 85, 247, 0.35);
+
+  --brand-gradient: linear-gradient(90deg, #ffffff, #c084fc);
+  --tab-active-gradient: linear-gradient(180deg, rgba(192, 132, 252, 0.04) 0%, rgba(192, 132, 252, 0.14) 100%);
+  --intro-icon-gradient: linear-gradient(135deg, rgba(192, 132, 252, 0.18), rgba(168, 85, 247, 0.22));
+
+  --radar-bg: #140b20;
+  --radar-border: rgba(192, 132, 252, 0.35);
+  --radar-ring: rgba(192, 132, 252, 0.1);
+  --radar-cone-start: rgba(192, 132, 252, 0.35);
+  --radar-bot: #c084fc;
+}

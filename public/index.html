@@ -5,18 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zoltraak | Autonomous Companion Dashboard</title>
   <meta name="description" content="Real-time live telemetry, tactical radar, and command control center for Zoltraak autonomous Minecraft companion bot.">
+  <link rel="icon" type="image/svg+xml" href="/zoltraak-logo.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/dashboard.css">
+  <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
   <div class="app-layout">
     <!-- Top Header Bar -->
     <header class="top-header">
       <div class="brand-group">
-        <div class="bot-avatar-glow">
-          <span class="avatar-icon">🧙‍♂️</span>
+        <div class="bot-avatar-glow" title="Zoltraak Arcane Core">
+          <img src="/zoltraak-logo.svg" alt="Zoltraak Arcane Crest" class="brand-logo-img">
         </div>
         <div class="brand-text">
           <div class="title-row">
@@ -28,6 +29,16 @@
       </div>
 
       <div class="header-status-bar">
+        <!-- Interactive Theme Picker -->
+        <div class="theme-picker-wrap">
+          <button type="button" id="themePickerBtn" class="theme-picker-btn" title="Switch UI Theme">
+            <span id="activeThemeDot" class="theme-dot"></span>
+            <span id="activeThemeName">Arcane Cyber</span>
+            <svg viewBox="0 0 24 24" class="ui-icon mini-icon"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div id="themeDropdown" class="theme-dropdown"></div>
+        </div>
+
         <div class="status-pill">
           <span id="connIndicator" class="pulse-beacon beacon-online"></span>
           <span id="connText">Connected</span>
@@ -50,23 +61,33 @@
     <!-- Navigation Tab Bar -->
     <nav class="nav-tabs-bar">
       <button class="nav-tab active" data-tab="hud">
-        <span class="tab-icon">🧭</span>
+        <span class="tab-icon">
+          <svg viewBox="0 0 24 24" class="ui-icon"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        </span>
         <span class="tab-title">Tactical HUD</span>
       </button>
       <button class="nav-tab" data-tab="privacy">
-        <span class="tab-icon">🔒</span>
+        <span class="tab-icon">
+          <svg viewBox="0 0 24 24" class="ui-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="1"/></svg>
+        </span>
         <span class="tab-title">Privacy & Audience</span>
       </button>
       <button class="nav-tab" data-tab="combat">
-        <span class="tab-icon">⚔️</span>
+        <span class="tab-icon">
+          <svg viewBox="0 0 24 24" class="ui-icon"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" x2="9" y1="14" y2="18"/></svg>
+        </span>
         <span class="tab-title">Combat & Defense</span>
       </button>
       <button class="nav-tab" data-tab="automation">
-        <span class="tab-icon">🚜</span>
+        <span class="tab-icon">
+          <svg viewBox="0 0 24 24" class="ui-icon"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+        </span>
         <span class="tab-title">Automation & Survival</span>
       </button>
       <button class="nav-tab" data-tab="server">
-        <span class="tab-icon">⚙️</span>
+        <span class="tab-icon">
+          <svg viewBox="0 0 24 24" class="ui-icon"><line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="1" x2="7" y1="14" y2="14"/><line x1="9" x2="15" y1="8" y2="8"/><line x1="17" x2="23" y1="16" y2="16"/></svg>
+        </span>
         <span class="tab-title">Server & Movement</span>
       </button>
     </nav>
@@ -84,7 +105,9 @@
           <section class="dash-card radar-section">
             <div class="card-header">
               <div class="header-left">
-                <span class="card-icon">🧭</span>
+                <span class="card-icon">
+                  <svg viewBox="0 0 24 24" class="ui-icon"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                </span>
                 <h2>Tactical Radar</h2>
               </div>
               <div class="radar-controls">
@@ -122,7 +145,9 @@
           <section class="dash-card hud-section">
             <div class="card-header">
               <div class="header-left">
-                <span class="card-icon">📊</span>
+                <span class="card-icon">
+                  <svg viewBox="0 0 24 24" class="ui-icon"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </span>
                 <h2>Vitals & Storage</h2>
               </div>
               <div id="dimensionBadge" class="dimension-tag">OVERWORLD</div>
@@ -132,7 +157,10 @@
             <div class="vitals-row">
               <div class="vital-gauge health-gauge">
                 <div class="gauge-label">
-                  <span>❤️ Health</span>
+                  <span class="label-with-icon">
+                    <svg viewBox="0 0 24 24" class="ui-icon text-health"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                    Health
+                  </span>
                   <span id="hpText" class="gauge-val">20 / 20</span>
                 </div>
                 <div class="progress-track">
@@ -142,7 +170,10 @@
 
               <div class="vital-gauge food-gauge">
                 <div class="gauge-label">
-                  <span>🍗 Hunger</span>
+                  <span class="label-with-icon">
+                    <svg viewBox="0 0 24 24" class="ui-icon text-food"><path d="M18 8a6 6 0 0 0-9.33-5 6 6 0 0 0-1.67 9l-4 4a2.83 2.83 0 1 0 4 4l4-4a6 6 0 0 0 7-8Z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+                    Hunger
+                  </span>
                   <span id="foodText" class="gauge-val">20 / 20</span>
                 </div>
                 <div class="progress-track">
@@ -165,7 +196,10 @@
                 <span class="coord-k">Z</span>
                 <span id="coordZ" class="coord-v">0.0</span>
               </div>
-              <button id="copyCoordsBtn" class="mini-btn" title="Copy coordinates">📋 Copy</button>
+              <button id="copyCoordsBtn" class="mini-btn" title="Copy coordinates">
+                <svg viewBox="0 0 24 24" class="ui-icon mini-icon"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                <span>Copy</span>
+              </button>
             </div>
 
             <!-- Interactive Minecraft Inventory Grid -->
@@ -175,13 +209,13 @@
                 <span id="invCountBadge" class="inv-badge">0 / 36 slots</span>
               </div>
 
-              <!-- Armor & Offhand Row -->
+              <!-- Armor & Offhand Row with Clean Equipment Silhouettes -->
               <div class="armor-row">
-                <div class="slot-wrap" data-slot="5" title="Helmet"><div id="slot-5" class="inv-slot armor-slot">🪖</div></div>
-                <div class="slot-wrap" data-slot="6" title="Chestplate"><div id="slot-6" class="inv-slot armor-slot">👕</div></div>
-                <div class="slot-wrap" data-slot="7" title="Leggings"><div id="slot-7" class="inv-slot armor-slot">👖</div></div>
-                <div class="slot-wrap" data-slot="8" title="Boots"><div id="slot-8" class="inv-slot armor-slot">🥾</div></div>
-                <div class="slot-wrap offhand-wrap" data-slot="45" title="Off-Hand"><div id="slot-45" class="inv-slot offhand-slot">🛡️</div></div>
+                <div class="slot-wrap" data-slot="5" title="Helmet"><div id="slot-5" class="inv-slot armor-slot"><svg viewBox="0 0 24 24" class="armor-svg"><path d="M12 2a9 9 0 0 0-9 9v4a2 2 0 0 0 2 2h2v4h10v-4h2a2 2 0 0 0 2-2v-4a9 9 0 0 0-9-9zm-4 9h8v3H8v-3z"/></svg></div></div>
+                <div class="slot-wrap" data-slot="6" title="Chestplate"><div id="slot-6" class="inv-slot armor-slot"><svg viewBox="0 0 24 24" class="armor-svg"><path d="M4 4l4 2 4-3 4 3 4-2v6l-3 3v8H7v-8L4 10V4z"/></svg></div></div>
+                <div class="slot-wrap" data-slot="7" title="Leggings"><div id="slot-7" class="inv-slot armor-slot"><svg viewBox="0 0 24 24" class="armor-svg"><path d="M5 3h14v7l-2 11h-4l-1-7-1 7H7L5 10V3z"/></svg></div></div>
+                <div class="slot-wrap" data-slot="8" title="Boots"><div id="slot-8" class="inv-slot armor-slot"><svg viewBox="0 0 24 24" class="armor-svg"><path d="M4 4h6v9h3l1 3 6 1v4H4V4z"/></svg></div></div>
+                <div class="slot-wrap offhand-wrap" data-slot="45" title="Off-Hand"><div id="slot-45" class="inv-slot offhand-slot"><svg viewBox="0 0 24 24" class="armor-svg"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div></div>
               </div>
 
               <!-- 27 Main Inventory Slots -->
@@ -197,25 +231,31 @@
           <section class="dash-card action-console-section">
             <div class="card-header">
               <div class="header-left">
-                <span class="card-icon">⚡</span>
+                <span class="card-icon">
+                  <svg viewBox="0 0 24 24" class="ui-icon"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </span>
                 <h2>Action Control</h2>
               </div>
             </div>
 
-            <!-- One-Click Command Buttons -->
+            <!-- One-Click Command Buttons with Vector Icons -->
             <div class="actions-grid">
-              <button class="cmd-btn btn-guard" data-cmd="guard"><span class="btn-icon">🛡️</span> Guard</button>
-              <button class="cmd-btn btn-farm" data-cmd="farm"><span class="btn-icon">🌾</span> Farm</button>
-              <button class="cmd-btn btn-lumber" data-cmd="lumber"><span class="btn-icon">🌲</span> Lumber</button>
-              <button class="cmd-btn btn-mine" data-cmd="mine diamond"><span class="btn-icon">⛏️</span> Mine</button>
-              <button class="cmd-btn btn-fish" data-cmd="fish"><span class="btn-icon">🎣</span> Fish</button>
-              <button class="cmd-btn btn-patrol" data-cmd="patrol"><span class="btn-icon">🏰</span> Patrol</button>
-              <button class="cmd-btn btn-archer" data-cmd="archer"><span class="btn-icon">🏹</span> Archer</button>
-              <button class="cmd-btn btn-smelt" data-cmd="smelt"><span class="btn-icon">🔥</span> Smelt</button>
-              <button class="cmd-btn btn-breed" data-cmd="breed"><span class="btn-icon">🐑</span> Breed</button>
-              <button class="cmd-btn btn-deposit" data-cmd="deposit"><span class="btn-icon">📦</span> Deposit</button>
-              <button class="cmd-btn btn-sleep" data-cmd="sleep"><span class="btn-icon">🛌</span> Sleep</button>
-              <button class="cmd-btn btn-stop" data-cmd="stop"><span class="btn-icon">🛑</span> Stop</button>
+              <button class="cmd-btn btn-guard" data-cmd="guard"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> Guard</button>
+              <button class="cmd-btn btn-farm" data-cmd="farm"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="M7 20h10"/><path d="M10 20c0-4.4 3.6-8 8-8"/><path d="M4 20c0-7.7 6.3-14 14-14"/><path d="M14 6c1.5-1 3.5-1.5 6-1.5-.5 2.5-1 4.5-2 6"/></svg></span> Farm</button>
+              <button class="cmd-btn btn-lumber" data-cmd="lumber"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="m14 12-8.5 8.5a2.12 2.12 0 1 1-3-3L11 9"/><path d="M15 13 9 7l4-4 6 6h3a8 8 0 0 1-7 7z"/></svg></span> Lumber</button>
+              <button class="cmd-btn btn-mine" data-cmd="mine diamond"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="m14 13-9.5 9.5a2.12 2.12 0 1 1-3-3L11 10"/><path d="m14 10 3-3a5 5 0 0 0 0-7l-1 1a5 5 0 0 1 0 7l-2 2z"/><path d="m10 14-3 3a5 5 0 0 0 7 0l1-1a5 5 0 0 1-7 0l-2-2z"/></svg></span> Mine</button>
+              <button class="cmd-btn btn-bridge" data-cmd="bridge 8"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><rect width="8" height="4" x="2" y="5" rx="1"/><rect width="8" height="4" x="14" y="5" rx="1"/><rect width="8" height="4" x="8" y="11" rx="1"/><rect width="8" height="4" x="2" y="17" rx="1"/><rect width="8" height="4" x="14" y="17" rx="1"/></svg></span> Bridge</button>
+              <button class="cmd-btn btn-tower" data-cmd="tower 5"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="m18 8-6-6-6 6"/><path d="M12 2v14"/><path d="M2 22h20"/><path d="M6 18h12"/></svg></span> Tower</button>
+              <button class="cmd-btn btn-sortbase" data-cmd="sortbase"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></span> Sort Base</button>
+              <button class="cmd-btn btn-clutch" data-cmd="clutch"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span> MLG Clutch</button>
+              <button class="cmd-btn btn-fish" data-cmd="fish"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.47-3.44 6-7 6s-7.56-2.53-8.5-6Z"/><path d="M18 12v.5"/><path d="M16 17.93a11 11 0 0 1-4.8 2.07L2 22l2.93-9.2A11 11 0 0 1 7 8"/></svg></span> Fish</button>
+              <button class="cmd-btn btn-patrol" data-cmd="patrol"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span> Patrol</button>
+              <button class="cmd-btn btn-archer" data-cmd="archer"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> Archer</button>
+              <button class="cmd-btn btn-smelt" data-cmd="smelt"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></span> Smelt</button>
+              <button class="cmd-btn btn-breed" data-cmd="breed"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5v4"/><path d="M10 7h4"/></svg></span> Breed</button>
+              <button class="cmd-btn btn-deposit" data-cmd="deposit"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></span> Deposit</button>
+              <button class="cmd-btn btn-sleep" data-cmd="sleep"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg></span> Sleep</button>
+              <button class="cmd-btn btn-stop" data-cmd="stop"><span class="btn-icon"><svg viewBox="0 0 24 24" class="ui-icon"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><rect width="8" height="8" x="8" y="8" rx="1"/></svg></span> Stop</button>
             </div>
 
             <!-- Live Terminal Feed -->
@@ -236,6 +276,105 @@
             </div>
           </section>
 
+          <!-- Row 2: Live Visual Perception & Sensory Logs Feed (Spans Columns 1 & 2) -->
+          <section class="dash-card sensory-section">
+            <div class="card-header">
+              <div class="header-left">
+                <span class="card-icon">
+                  <svg viewBox="0 0 24 24" class="ui-icon"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </span>
+                <h2>Visual Perception & Sensory Feed</h2>
+                <div id="gazeIndicator" class="gaze-indicator" title="Current gaze target in crosshair">
+                  <span class="gaze-dot"></span>
+                  <span class="gaze-label">LOOKING AT:</span>
+                  <span id="gazeTargetName" class="gaze-val">Scanning Horizon...</span>
+                </div>
+              </div>
+              <div class="header-right perception-controls">
+                <div class="filter-group">
+                  <button type="button" class="filter-pill active" data-filter="all">All Senses</button>
+                  <button type="button" class="filter-pill" data-filter="sight">Sight & Mobs</button>
+                  <button type="button" class="filter-pill" data-filter="env">Environment</button>
+                </div>
+                <button type="button" id="clearPerceptionBtn" class="mini-btn" title="Clear perception stream">Clear</button>
+              </div>
+            </div>
+
+            <!-- Environmental Senses Bar -->
+            <div class="env-senses-bar">
+              <div class="env-chip" title="Current Biome">
+                <span class="env-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="M12 2 6 9h3l-4 7h6v4h2v-4h6l-4-7h3z"/></svg></span>
+                <span class="env-label">Biome</span>
+                <span id="envBiome" class="env-val">Scanning...</span>
+              </div>
+              <div class="env-chip" title="Light Level (Sky / Block light - block light 0 is mob spawn risk)">
+                <span class="env-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></span>
+                <span class="env-label">Light</span>
+                <span id="envLight" class="env-val env-safe">15 (Safe)</span>
+              </div>
+              <div class="env-chip" title="Time of Day & Weather">
+                <span class="env-icon"><svg viewBox="0 0 24 24" class="ui-icon"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></span>
+                <span class="env-label">Solar/Weather</span>
+                <span id="envWeather" class="env-val">Day • Clear</span>
+              </div>
+              <div class="env-chip" title="Block Under Feet">
+                <span class="env-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg></span>
+                <span class="env-label">Ground</span>
+                <span id="envGround" class="env-val">grass_block</span>
+              </div>
+              <div class="env-chip" title="Facing Direction & Pitch">
+                <span class="env-icon"><svg viewBox="0 0 24 24" class="ui-icon"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
+                <span class="env-label">Facing</span>
+                <span id="envFacing" class="env-val">South (Yaw 0°)</span>
+              </div>
+              <div class="env-chip" title="Active Line of Sight">
+                <span class="env-icon"><svg viewBox="0 0 24 24" class="ui-icon"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg></span>
+                <span class="env-label">Crosshair</span>
+                <span id="envCrosshair" class="env-val">Clear Horizon</span>
+              </div>
+            </div>
+
+            <!-- Sensory Dual Panels: Visible Entities & Live Observation Log -->
+            <div class="sensory-body-grid">
+              <!-- Left: Entities in Field of View -->
+              <div class="entities-sight-panel">
+                <div class="sub-panel-header">
+                  <div class="sub-title-wrap">
+                    <span class="sub-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+                    <h3>Entities In Sight</h3>
+                  </div>
+                  <span id="sightCountBadge" class="sight-count-badge">0 visible</span>
+                </div>
+                <div id="entitiesSightList" class="entities-sight-list">
+                  <div class="sight-empty-state">
+                    <span class="empty-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg></span>
+                    <span>No entities in direct sight line</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Live Sensory & Perception Event Feed -->
+              <div class="perception-log-panel">
+                <div class="sub-panel-header">
+                  <div class="sub-title-wrap">
+                    <span class="sub-icon"><svg viewBox="0 0 24 24" class="ui-icon"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg></span>
+                    <h3>Sensory Observation Stream</h3>
+                  </div>
+                  <div class="feed-status-tag">
+                    <span class="feed-pulse"></span> Live Sensory Feed
+                  </div>
+                </div>
+                <div id="perceptionFeed" class="perception-feed">
+                  <div class="perceive-entry system">
+                    <span class="perceive-time">--:--:--</span>
+                    <span class="perceive-badge badge-sys">SYSTEM</span>
+                    <span class="perceive-text">Visual and acoustic perception cortex online. Initializing sensory scan...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
         </div>
       </section>
 
@@ -245,7 +384,9 @@
       <section id="page-privacy" class="tab-page">
         <div class="page-container">
           <div class="page-intro">
-            <div class="intro-icon">🔒</div>
+            <div class="intro-icon">
+              <svg viewBox="0 0 24 24" class="ui-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="1"/></svg>
+            </div>
             <div>
               <h2 class="page-title">Message Privacy & Audience Control</h2>
               <p class="page-desc">Define who can hear Zoltraak's replies, manage trusted players who can give commands, and control bot discretion.</p>
@@ -257,7 +398,9 @@
             <!-- Card: Audience Mode -->
             <div class="settings-card">
               <div class="settings-card-header">
-                <span class="card-lead-icon">📡</span>
+                <span class="card-lead-icon">
+                  <svg viewBox="0 0 24 24" class="ui-icon"><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/></svg>
+                </span>
                 <div>
                   <h3>Message Audience Mode</h3>
                   <p>Choose who receives messages and alerts generated by Zoltraak</p>
@@ -266,14 +409,26 @@
 
               <div class="audience-options-grid">
                 <label class="audience-radio-card">
-                  <input type="radio" name="audienceMode" value="whisper_only" checked>
+                  <input type="radio" name="audienceMode" value="dynamic" checked>
                   <div class="radio-card-content">
                     <div class="radio-header">
-                      <span class="radio-icon">🤫</span>
-                      <span class="radio-title">Whisper to Owner Only</span>
-                      <span class="badge badge-recommended">Default / Stealth</span>
+                      <span class="radio-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                      <span class="radio-title">Dynamic Channel Match</span>
+                      <span class="badge badge-recommended">Default / Realistic</span>
                     </div>
-                    <p class="radio-desc">Zoltraak sends 100% private whispers to the owner exclusively. No other server player can ever see bot messages.</p>
+                    <p class="radio-desc">Automatically detects communication channel: replies in public chat if spoken to in chat, and replies via private whisper if whispered or commanded from web.</p>
+                  </div>
+                </label>
+
+                <label class="audience-radio-card">
+                  <input type="radio" name="audienceMode" value="whisper_only">
+                  <div class="radio-card-content">
+                    <div class="radio-header">
+                      <span class="radio-icon"><svg viewBox="0 0 24 24" class="ui-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                      <span class="radio-title">Whisper to Owner Only</span>
+                      <span class="badge badge-stealth">Stealth</span>
+                    </div>
+                    <p class="radio-desc">Zoltraak sends 100% private whispers to the owner exclusively. Never speaks in public server chat.</p>
                   </div>
                 </label>
 
@@ -281,7 +436,7 @@
                   <input type="radio" name="audienceMode" value="whitelist_whisper">
                   <div class="radio-card-content">
                     <div class="radio-header">
-                      <span class="radio-icon">👥</span>
+                      <span class="radio-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
                       <span class="radio-title">Whitelisted Whispers</span>
                       <span class="badge badge-team">Team Mode</span>
                     </div>
@@ -293,7 +448,7 @@
                   <input type="radio" name="audienceMode" value="public_chat">
                   <div class="radio-card-content">
                     <div class="radio-header">
-                      <span class="radio-icon">📢</span>
+                      <span class="radio-icon"><svg viewBox="0 0 24 24" class="ui-icon"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
                       <span class="radio-title">Public Server Chat</span>
                       <span class="badge badge-broadcast">Broadcast</span>
                     </div>
@@ -306,7 +461,9 @@
             <!-- Card: Whitelist Manager -->
             <div class="settings-card">
               <div class="settings-card-header">
-                <span class="card-lead-icon">🛡️</span>
+                <span class="card-lead-icon">
+                  <svg viewBox="0 0 24 24" class="ui-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </span>
                 <div>
                   <h3>Trusted Player Whitelist</h3>
                   <p>Players on this list receive whispers in Team Mode and are authorized to issue commands to Zoltraak.</p>
@@ -329,7 +486,9 @@
             <!-- Card: Discretion & Persona -->
             <div class="settings-card">
               <div class="settings-card-header">
-                <span class="card-lead-icon">🎭</span>
+                <span class="card-lead-icon">
+                  <svg viewBox="0 0 24 24" class="ui-icon"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </span>
                 <div>
                   <h3>Discretion & Persona</h3>
                   <p>Customize bot chattiness and messaging prefix</p>
@@ -358,7 +517,10 @@
 
             <!-- Save Bar -->
             <div class="settings-actions-bar">
-              <button type="submit" class="modal-btn btn-primary btn-large">💾 Save Privacy Settings</button>
+              <button type="submit" class="modal-btn btn-primary btn-large">
+                <svg viewBox="0 0 24 24" class="ui-icon mini-icon"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span>Save Privacy Settings</span>
+              </button>
             </div>
 
           </form>
@@ -371,7 +533,9 @@
       <section id="page-combat" class="tab-page">
         <div class="page-container">
           <div class="page-intro">
-            <div class="intro-icon">⚔️</div>
+            <div class="intro-icon">
+              <svg viewBox="0 0 24 24" class="ui-icon"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" x2="9" y1="14" y2="18"/></svg>
+            </div>
             <div>
               <h2 class="page-title">Combat & Tactical Defense</h2>
               <p class="page-desc">Configure reactive shield parrying against projectiles, creeper blast retreats, archer kiting, and totem failsafes.</p>
@@ -383,7 +547,9 @@
             <!-- Card: Target Priority -->
             <div class="settings-card">
               <div class="settings-card-header">
-                <span class="card-lead-icon">🎯</span>
+                <span class="card-lead-icon">
+                  <svg viewBox="0 0 24 24" class="ui-icon"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                </span>
                 <div>
                   <h3>Target Priority & Engagement</h3>
                   <p>Determine which entities Zoltraak engages in combat</p>
@@ -404,7 +570,9 @@
             <!-- Card: Reactive Defense & Parrying -->
             <div class="settings-card">
               <div class="settings-card-header">
-                <span class="card-lead-icon">🛡️</span>
+                <span class="card-lead-icon">
+                  <svg viewBox="0 0 24 24" class="ui-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </span>
                 <div>
                   <h3>Reactive Shield & Evasion</h3>
                   <p>Parry incoming projectiles and deflect creeper explosions</p>
@@ -448,7 +616,9 @@
             <!-- Card: Archer & Totem Stance -->
             <div class="settings-card">
               <div class="settings-card-header">
-                <span class="card-lead-icon">🏹</span>
+                <span class="card-lead-icon">
+                  <svg viewBox="0 0 24 24" class="ui-icon"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>
+                </span>
                 <div>
                   <h3>Archer Stance & Totem Failsafe</h3>
                   <p>Fine-tune ranged bow positioning and emergency totem swapping</p>
@@ -476,7 +646,10 @@
 
             <!-- Save Bar -->
             <div class="settings-actions-bar">
-              <button type="submit" class="modal-btn btn-primary btn-large">💾 Save Combat Settings</button>
+              <button type="submit" class="modal-btn btn-primary btn-large">
+                <svg viewBox="0 0 24 24" class="ui-icon mini-icon"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span>Save Combat Settings</span>
+              </button>
             </div>
 
           </form>
@@ -489,7 +662,9 @@
       <section id="page-automation" class="tab-page">
         <div class="page-container">
           <div class="page-intro">
-            <div class="intro-icon">🚜</div>
+            <div class="intro-icon">
+              <svg viewBox="0 0 24 24" class="ui-icon"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+            </div>
             <div>
               <h2 class="page-title">Automation & Resource Gathering</h2>
               <p class="page-desc">Automate vital survival routines, sustainable tree-felling, underground strip-mining tunnels, and animal breeding.</p>
@@ -501,7 +676,9 @@
             <!-- Card: Nutrition & Sleep -->
             <div class="settings-card">
               <div class="settings-card-header">
-                <span class="card-lead-icon">🍗</span>
+                <span class="card-lead-icon">
+                  <svg viewBox="0 0 24 24" class="ui-icon"><path d="M18 8a6 6 0 0 0-9.33-5 6 6 0 0 0-1.67 9l-4 4a2.83 2.83 0 1 0 4 4l4-4a6 6 0 0 0 7-8Z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+                </span>
                 <div>
                   <h3>Survival Vitals & Bedtime</h3>
                   <p>Auto-nutrition management and nocturnal bed seeking</p>
@@ -545,7 +722,9 @@
             <!-- Card: Forestry & Mining -->
             <div class="settings-card">
               <div class="settings-card-header">
-                <span class="card-lead-icon">🌲</span>
+                <span class="card-lead-icon">
+                  <svg viewBox="0 0 24 24" class="ui-icon"><path d="M12 2 6 9h3l-4 7h6v4h2v-4h6l-4-7h3z"/></svg>
+                </span>
                 <div>
                   <h3>Forestry & Underground Excavation</h3>
                   <p>Configure tree replanting and tunnel excavation parameters</p>
@@ -593,7 +772,10 @@
 
             <!-- Save Bar -->
             <div class="settings-actions-bar">
-              <button type="submit" class="modal-btn btn-primary btn-large">💾 Save Automation Settings</button>
+              <button type="submit" class="modal-btn btn-primary btn-large">
+                <svg viewBox="0 0 24 24" class="ui-icon mini-icon"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span>Save Automation Settings</span>
+              </button>
             </div>
 
           </form>
@@ -606,7 +788,9 @@
       <section id="page-server" class="tab-page">
         <div class="page-container">
           <div class="page-intro">
-            <div class="intro-icon">⚙️</div>
+            <div class="intro-icon">
+              <svg viewBox="0 0 24 24" class="ui-icon"><line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="1" x2="7" y1="14" y2="14"/><line x1="9" x2="15" y1="8" y2="8"/><line x1="17" x2="23" y1="16" y2="16"/></svg>
+            </div>
             <div>
               <h2 class="page-title">Server Connection & Movement Physics</h2>
               <p class="page-desc">Manage Minecraft host IP, Radmin VPN address, port, and fine-tune escort pathfinding physics.</p>
@@ -618,7 +802,9 @@
             <!-- Card: Minecraft Server Connection -->
             <div class="settings-card">
               <div class="settings-card-header">
-                <span class="card-lead-icon">🌐</span>
+                <span class="card-lead-icon">
+                  <svg viewBox="0 0 24 24" class="ui-icon"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </span>
                 <div>
                   <h3>Server Connection & Identity</h3>
                   <p>Target Minecraft server details and bot login credentials</p>
@@ -626,7 +812,7 @@
               </div>
 
               <div class="callout-tip">
-                <span class="tip-icon">💡</span>
+                <span class="tip-icon"><svg viewBox="0 0 24 24" class="ui-icon mini-icon"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></span>
                 <span><strong>Radmin VPN Tip:</strong> If your server is on a separate PC via Radmin VPN, enter that PC's Radmin IP (e.g. <code>26.234.86.53</code>) and server port (e.g. <code>25566</code>).</span>
               </div>
 
@@ -657,14 +843,17 @@
               </div>
 
               <div class="reconnect-warning">
-                ⚠️ Modifying server IP, port, or usernames will trigger an automatic bot reconnection.
+                <svg viewBox="0 0 24 24" class="ui-icon mini-icon"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                <span>Modifying server IP, port, or usernames will trigger an automatic bot reconnection.</span>
               </div>
             </div>
 
             <!-- Card: Movement Physics & Navigation -->
             <div class="settings-card">
               <div class="settings-card-header">
-                <span class="card-lead-icon">🏃</span>
+                <span class="card-lead-icon">
+                  <svg viewBox="0 0 24 24" class="ui-icon"><circle cx="17" cy="4" r="2"/><path d="m15 8-4 4-4-2-4 4"/><path d="m11 12 2 9"/><path d="m15 15 3 6"/></svg>
+                </span>
                 <div>
                   <h3>Navigation & Escort Physics</h3>
                   <p>Tune walking behavior, step auto-jump assistant, and collision un-sticking</p>
@@ -725,7 +914,10 @@
 
             <!-- Save Bar -->
             <div class="settings-actions-bar">
-              <button type="submit" class="modal-btn btn-primary btn-large">💾 Save Server & Movement Settings</button>
+              <button type="submit" class="modal-btn btn-primary btn-large">
+                <svg viewBox="0 0 24 24" class="ui-icon mini-icon"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span>Save Server & Movement Settings</span>
+              </button>
             </div>
 
           </form>
@@ -743,6 +935,6 @@
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/dashboard.js"></script>
+  <script type="module" src="/js/main.js"></script>
 </body>
 </html>

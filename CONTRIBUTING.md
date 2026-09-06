@@ -83,6 +83,10 @@ Zoltraak is organized into clean, modular subsystems under `src/`:
 
 ```
 Zoltraak/
+├── public/                 # Live Web Dashboard assets
+│   ├── index.html          # Dashboard HTML5 UI
+│   ├── dashboard.css       # Design tokens & glassmorphism theme
+│   └── dashboard.js        # Canvas radar, SSE client, telemetry rendering
 ├── bot.js                  # Entry point with crash-safety handlers
 ├── config.json             # Active bot configuration (auto-generated if missing)
 ├── config.example.json     # Default configuration template
@@ -97,7 +101,17 @@ Zoltraak/
 │   ├── commands.js         # Chat & whisper command parser
 │   ├── loops.js            # Autonomous background intervals (farming, defense, roaming)
 │   ├── modules/            # Autonomous feature modules
-│   │   ├── combat.js       # Target selection, mob defense, bodyguard escort, weapon equip
+│   │   ├── web/
+│   │   │   └── server.js   # Native HTTP server with SSE telemetry & command API
+│   │   ├── lumber.js       # Auto-lumberjack & sapling replanting
+│   │   ├── mining.js       # Smart ore vein miner & branch tunnel excavator
+│   │   ├── smelter.js      # Furnace automation & auto-smelting
+│   │   ├── rancher.js      # Animal breeding & livestock management
+│   │   ├── combat.js       # Shield reflexes, archer kiting, bodyguard escort
+│   │   ├── patrol.js       # Perimeter sentry radar & waypoint walking
+│   │   ├── crafting.js     # Auto-crafter & autonomous tool replenisher
+│   │   ├── courier.js      # Base chest item retrieval & owner delivery
+│   │   ├── death.js        # Death marker logging & corpse retrieval
 │   │   ├── farming.js      # Farmland-safe crop harvesting, replanting, O(1) scans
 │   │   ├── fishing.js      # Water detection, bobber casting, bite splash detection
 │   │   ├── chest.js        # Base chest deposits, item restocking, inventory drops

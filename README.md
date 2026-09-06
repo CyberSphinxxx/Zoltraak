@@ -4,6 +4,7 @@
 [![Mineflayer](https://img.shields.io/badge/Mineflayer-4.38%2B-blue.svg)](https://github.com/PrismarineJS/mineflayer)
 [![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.2-orange.svg)](https://minecraft.net/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Contributing Guide](https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 **Zoltraak** is an intelligent, human-like autonomous companion bot designed for modern Minecraft servers (`1.21.x`). Unlike basic AFK bots, Zoltraak interacts naturally with player mechanics, defends its owner, manages crop farms without trampling soil, catches fish autonomously, manages storage chests, and greets players using authentic community mannerisms.
 
@@ -30,12 +31,13 @@
 ## 🚀 Quickstart
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) (version 18 or higher recommended)
+- [Node.js](https://nodejs.org/) (version 18 or higher recommended) & npm
 - A Minecraft Server (`Paper`, `Purpur`, `Spigot`, or `Fabric`) supporting Minecraft `1.21.x`
+- *(Coming from Python? See [requirements.txt](requirements.txt) for a quick command and package comparison)*
 
 ### Installation
 
-1. **Clone the repository:**
+1. **Clone or Fork the repository:**
    ```bash
    git clone https://github.com/<your-username>/zoltraak.git
    cd zoltraak
@@ -47,7 +49,7 @@
    ```
 
 3. **Configure the bot:**
-   Copy `config.example.json` to `config.json`:
+   Zoltraak will automatically generate `config.json` from `config.example.json` on first run. You can also copy it manually:
    ```bash
    cp config.example.json config.json
    ```
@@ -65,12 +67,32 @@
      "autoFarm": true
    }
    ```
+   *(Or configure via environment variables with `.env` — see [.env.example](.env.example))*
 
 4. **Start Zoltraak:**
    ```bash
+   # Standard start
    npm start
+
+   # Development mode (auto-reloads on file changes)
+   npm run dev
    ```
-   *(Or on Windows, double-click `start_zoltraak.bat`)*
+   *(On Windows, you can also double-click `start_zoltraak.bat`)*
+
+### 🐳 Running with Docker
+```bash
+docker compose up -d
+```
+
+---
+
+## 🍴 Forking & Modifying Zoltraak
+
+Looking to build custom behaviors or add custom commands? Zoltraak is designed to be completely modular:
+- Check out **[CONTRIBUTING.md](CONTRIBUTING.md)** for a full architecture breakdown and step-by-step tutorials:
+  - 📖 **[How to add a new in-game command](CONTRIBUTING.md#tutorial-1-adding-a-new-in-game-command)**
+  - 🤖 **[How to build a new autonomous behavior](CONTRIBUTING.md#tutorial-2-creating-a-new-autonomous-behavior-module)**
+  - 🐞 **One-click VS Code Debugging** via `.vscode/launch.json` (press `F5` to debug)
 
 ---
 

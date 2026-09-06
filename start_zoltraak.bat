@@ -3,7 +3,7 @@ title Zoltraak Bot and Dashboard
 cd /d "%~dp0"
 
 echo ========================================================
-echo  🧙‍♂️ Zoltraak Companion Bot
+echo  [+] Zoltraak Autonomous Tactical Companion
 echo  Opening Web Dashboard: http://localhost:3000
 echo ========================================================
 echo.

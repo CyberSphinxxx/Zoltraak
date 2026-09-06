@@ -37,7 +37,72 @@ function applyEnvOverrides(cfg) {
   if (process.env.MC_AUTO_FARM !== undefined) {
     cfg.autoFarm = process.env.MC_AUTO_FARM === 'true';
   }
+  if (process.env.DASHBOARD_PORT || process.env.PORT) {
+    const dPort = parseInt(process.env.DASHBOARD_PORT || process.env.PORT, 10);
+    if (!isNaN(dPort)) cfg.dashboardPort = dPort;
+  }
+  if (process.env.DASHBOARD_ENABLED !== undefined) {
+    cfg.dashboardEnabled = process.env.DASHBOARD_ENABLED === 'true';
+  }
+  if (cfg.dashboardPort === undefined) cfg.dashboardPort = 3000;
+  if (cfg.dashboardEnabled === undefined) cfg.dashboardEnabled = true;
   return cfg;
+}
+
+const DEFAULT_CONFIG = {
+  host: 'localhost',
+  port: 25565,
+  username: 'Zoltraak',
+  owner: 'Owner',
+  version: '1.21.2',
+  roamRadius: 16,
+  autoSleep: true,
+  autoDefend: true,
+  autoFarm: true,
+  dashboardPort: 3000,
+  dashboardEnabled: true,
+  privacy: {
+    audienceMode: 'whisper_only', // 'whisper_only' | 'whitelist_whisper' | 'public_chat'
+    whitelist: ['Owner'],
+    silentMode: false,
+    botPrefix: '[Zoltraak]'
+  },
+  combat: {
+    targetPriority: 'hostiles_only', // 'hostiles_only' | 'all_mobs' | 'player_defense'
+    shieldParry: true,
+    shieldParryDistance: 10,
+    archerKiteDistance: 8,
+    totemThreshold: 12,
+    creeperAvoidance: true
+  },
+  navigation: {
+    followDistance: 3,
+    allowSprinting: false,
+    autoJumpAssist: true,
+    antiStuckTimeout: 600
+  },
+  automation: {
+    autoEatThreshold: 15,
+    autoReplantSaplings: true,
+    mineBranchLength: 16,
+    mineTorchSpacing: 6,
+    breedLimit: 12
+  }
+};
+
+function deepMerge(target, source) {
+  for (const key of Object.keys(source)) {
+    if (source[key] instanceof Object && !Array.isArray(source[key])) {
+      if (!target[key] || typeof target[key] !== 'object' || Array.isArray(target[key])) {
+        target[key] = {};
+      }
+      deepMerge(target[key], source[key]);
+    } else if (target[key] === undefined) {
+      // Clone arrays so mutations do not leak
+      target[key] = Array.isArray(source[key]) ? [...source[key]] : source[key];
+    }
+  }
+  return target;
 }
 
 function loadConfig() {
@@ -55,17 +120,20 @@ function loadConfig() {
     config = JSON.parse(raw);
   } catch (err) {
     console.error('[Zoltraak Config] Error loading config.json, falling back to defaults:', err.message);
-    config = {
-      host: 'localhost',
-      port: 25565,
-      username: 'Zoltraak',
-      owner: 'Owner',
-      version: '1.21.2',
-      roamRadius: 16,
-      autoSleep: true,
-      autoDefend: true,
-      autoFarm: true
-    };
+    config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  }
+
+  // Deep-merge defaults into config so any missing nested objects/fields exist
+  config = deepMerge(config, JSON.parse(JSON.stringify(DEFAULT_CONFIG)));
+
+  // Ensure owner is present in whitelist and clean placeholder
+  if (config.owner && config.privacy && Array.isArray(config.privacy.whitelist)) {
+    if (config.owner !== 'Owner') {
+      config.privacy.whitelist = config.privacy.whitelist.filter(u => u !== 'Owner');
+    }
+    if (!config.privacy.whitelist.includes(config.owner)) {
+      config.privacy.whitelist.unshift(config.owner);
+    }
   }
 
   // Allow environment variables to override config.json values
@@ -96,8 +164,10 @@ function saveConfig(updatedConfig) {
 loadConfig();
 
 module.exports = {
+  DEFAULT_CONFIG,
   loadConfig,
   getConfig,
   saveConfig,
+  deepMerge,
   configPath
 };

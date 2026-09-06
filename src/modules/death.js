@@ -21,12 +21,12 @@ function handleDeath(ctx) {
   ctx.sendReply(alert, true);
 }
 
-async function recoverCorpse(ctx, isWhisper = true) {
+async function recoverCorpse(ctx, isWhisper = true, targetPlayer = null) {
   const { bot, state } = ctx;
   if (!bot) return;
 
   if (!state.deathPos) {
-    ctx.sendReply('I do not have a recorded death location to recover!', isWhisper);
+    ctx.sendReply('I do not have a recorded death location to recover!', isWhisper, targetPlayer);
     return;
   }
 
@@ -35,7 +35,7 @@ async function recoverCorpse(ctx, isWhisper = true) {
   state.currentState = 'RETRIEVING';
 
   const { x, y, z } = state.deathPos;
-  ctx.sendReply(`Heading to death coordinates at (${x}, ${y}, ${z}) to recover dropped items...`, isWhisper);
+  ctx.sendReply(`Heading to death coordinates at (${x}, ${y}, ${z}) to recover dropped items...`, isWhisper, targetPlayer);
 
   try {
     await bot.pathfinder.goto(new goals.GoalNear(x, y, z, 2));
@@ -51,12 +51,12 @@ async function recoverCorpse(ctx, isWhisper = true) {
       bot.armorManager.equipAll();
     }
 
-    ctx.sendReply('Corpse recovered! Gathered dropped items and re-equipped.', isWhisper);
+    ctx.sendReply('Corpse recovered! Gathered dropped items and re-equipped.', isWhisper, targetPlayer);
     console.log('[Zoltraak Death] Corpse recovery routine completed successfully.');
 
   } catch (err) {
     console.log('[Zoltraak Death] Recovery path error: ' + err.message);
-    ctx.sendReply('Encountered an obstacle reaching the death location.', isWhisper);
+    ctx.sendReply('Encountered an obstacle reaching the death location.', isWhisper, targetPlayer);
   }
 
   state.isRetrieving = false;

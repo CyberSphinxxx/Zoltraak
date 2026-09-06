@@ -100,7 +100,7 @@ async function checkAndFarmCrops(ctx, mcData) {
           if (farmland) {
             await bot.placeBlock(farmland, new Vec3(0, 1, 0));
           }
-        } catch (plantErr) {}
+        } catch (plantErr) { }
       }
     }
 

@@ -1,0 +1,26 @@
+# Zoltraak Requirements & Prerequisites
+# ===============================================
+# Note: Zoltraak is written in modern JavaScript (Node.js).
+# If you are coming from Python or looking for dependencies to install:
+#
+# QUICKSTART INSTALL:
+#   npm install
+#
+# RUNNING THE BOT:
+#   npm start            # Run in standard mode
+#   npm run dev          # Run in auto-reloading watch mode
+#
+# ===============================================
+# Runtime Prerequisites:
+# - Node.js >= 18.0.0 (Node 20+ Recommended: https://nodejs.org/)
+# - npm >= 9.0.0
+# - Minecraft Server 1.21.x (Paper, Purpur, Spigot, or Fabric)
+#
+# Core Node.js Dependencies (managed via package.json):
+mineflayer>=4.38.0
+mineflayer-pathfinder>=2.4.5
+mineflayer-pvp>=1.3.2
+mineflayer-auto-eat>=5.0.3
+mineflayer-armor-manager>=2.0.1
+minecraft-data>=3.116.0
+vec3>=0.2.0

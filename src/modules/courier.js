@@ -1,20 +1,21 @@
 const { Vec3 } = require('vec3');
 const { goals } = require('mineflayer-pathfinder');
 
-async function deliverItemToOwner(ctx, itemName, count = 1, isWhisper = true) {
+async function deliverItemToOwner(ctx, itemName, count = 1, isWhisper = true, targetPlayer = null) {
   const { bot, state, config } = ctx;
   if (!bot || state.isDelivering) return;
 
-  const owner = bot.players[config.owner]?.entity;
+  const ownerName = targetPlayer || config.owner;
+  const owner = bot.players[ownerName]?.entity;
   if (!owner) {
-    ctx.sendReply("I can't see your coordinates right now. Come closer so I can find you!", isWhisper);
+    ctx.sendReply("I can't see your coordinates right now. Come closer so I can find you!", isWhisper, targetPlayer);
     return;
   }
 
   state.isDelivering = true;
   const prev = state.currentState;
   state.currentState = 'COURIER';
-  ctx.sendReply(`Got it, fetching ${count}x ${itemName} for you...`, isWhisper);
+  ctx.sendReply(`Got it, fetching ${count}x ${itemName} for you...`, isWhisper, targetPlayer);
 
   try {
     const query = itemName.toLowerCase();
@@ -48,14 +49,14 @@ async function deliverItemToOwner(ctx, itemName, count = 1, isWhisper = true) {
     invTotal = foundInInv.reduce((sum, item) => sum + item.count, 0);
 
     if (invTotal === 0) {
-      ctx.sendReply(`Sorry, couldn't find any ${itemName} in my bag or base storage!`, isWhisper);
+      ctx.sendReply(`Sorry, couldn't find any ${itemName} in my bag or base storage!`, isWhisper, targetPlayer);
       state.isDelivering = false;
       state.currentState = prev === 'COURIER' ? 'ROAM' : prev;
       return;
     }
 
     // Path to owner's current position
-    console.log(`[Zoltraak Courier] Delivering to ${config.owner}...`);
+    console.log(`[Zoltraak Courier] Delivering to ${ownerName}...`);
     await bot.pathfinder.goto(new goals.GoalFollow(owner, 2));
 
     // Look at owner and drop item
@@ -70,8 +71,8 @@ async function deliverItemToOwner(ctx, itemName, count = 1, isWhisper = true) {
       await bot.waitForTicks(3);
     }
 
-    ctx.sendReply('Here you go!', isWhisper);
-    console.log(`[Zoltraak Courier] Delivered ${count}x ${itemName} to ${config.owner}.`);
+    ctx.sendReply('Here you go!', isWhisper, targetPlayer);
+    console.log(`[Zoltraak Courier] Delivered ${count}x ${itemName} to ${ownerName}.`);
 
   } catch (err) {
     console.log('[Zoltraak Courier] Delivery error: ' + err.message);

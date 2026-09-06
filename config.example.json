@@ -1,0 +1,21 @@
+{
+  "host": "localhost",
+  "port": 25565,
+  "username": "Zoltraak",
+  "owner": "YourPlayerName",
+  "version": "1.21.2",
+  "home": {
+    "x": 0,
+    "y": 64,
+    "z": 0
+  },
+  "roamRadius": 16,
+  "autoSleep": true,
+  "autoDefend": true,
+  "autoFarm": true,
+  "chest": {
+    "x": 0,
+    "y": 64,
+    "z": 0
+  }
+}

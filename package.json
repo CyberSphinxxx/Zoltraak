@@ -1,0 +1,30 @@
+{
+  "name": "zoltraak-minecraft-companion",
+  "version": "1.0.0",
+  "description": "Autonomous, human-like Minecraft companion bot with farming, bodyguarding, fishing, and base automation.",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "keywords": [
+    "minecraft",
+    "mineflayer",
+    "minecraft-bot",
+    "companion-bot",
+    "bodyguard",
+    "farming-bot",
+    "fishing-bot",
+    "prismarine"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "mineflayer": "^4.38.0",
+    "mineflayer-armor-manager": "^2.0.1",
+    "mineflayer-auto-eat": "^5.0.3",
+    "mineflayer-pathfinder": "^2.4.5",
+    "mineflayer-pvp": "^1.3.2",
+    "vec3": "^0.2.0"
+  }
+}

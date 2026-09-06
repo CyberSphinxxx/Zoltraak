@@ -4,8 +4,20 @@
   "description": "Autonomous, human-like Minecraft companion bot with farming, bodyguarding, fishing, and base automation.",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js"
+    "start": "node bot.js",
+    "dev": "node --watch bot.js"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CyberSphinxxx/Zoltraak.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CyberSphinxxx/Zoltraak/issues"
+  },
+  "homepage": "https://github.com/CyberSphinxxx/Zoltraak#readme",
   "keywords": [
     "minecraft",
     "mineflayer",
@@ -20,6 +32,7 @@
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
+    "minecraft-data": "^3.116.0",
     "mineflayer": "^4.38.0",
     "mineflayer-armor-manager": "^2.0.1",
     "mineflayer-auto-eat": "^5.0.3",

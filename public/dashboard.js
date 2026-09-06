@@ -33,6 +33,23 @@ const cmdInput = document.getElementById('cmdInput');
 const clearConsoleBtn = document.getElementById('clearConsoleBtn');
 const radarRangeSelect = document.getElementById('radarRange');
 
+// Sensory & Perception Elements
+const gazeTargetName = document.getElementById('gazeTargetName');
+const envBiome = document.getElementById('envBiome');
+const envLight = document.getElementById('envLight');
+const envWeather = document.getElementById('envWeather');
+const envGround = document.getElementById('envGround');
+const envFacing = document.getElementById('envFacing');
+const envCrosshair = document.getElementById('envCrosshair');
+const sightCountBadge = document.getElementById('sightCountBadge');
+const entitiesSightList = document.getElementById('entitiesSightList');
+const perceptionFeed = document.getElementById('perceptionFeed');
+const clearPerceptionBtn = document.getElementById('clearPerceptionBtn');
+const perceptionFilterBtns = document.querySelectorAll('.filter-pill[data-filter]');
+
+let activePerceptionFilter = 'all';
+let allPerceptionEntries = [];
+
 // Tab Navigation Elements
 const navTabs = document.querySelectorAll('.nav-tab');
 const tabPages = document.querySelectorAll('.tab-page');
@@ -58,7 +75,9 @@ function showToast(message, type = 'success') {
 
   const toast = document.createElement('div');
   toast.className = `toast ${type === 'error' ? 'toast-error' : ''}`;
-  const icon = type === 'error' ? '❌' : '✨';
+  const icon = type === 'error'
+    ? '<svg viewBox="0 0 24 24" class="ui-icon toast-svg toast-err"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
+    : '<svg viewBox="0 0 24 24" class="ui-icon toast-svg toast-suc"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
   toast.innerHTML = `<span class="toast-icon">${icon}</span><span>${escapeHtml(message)}</span>`;
 
   container.appendChild(toast);
@@ -123,51 +142,52 @@ if (window.location.hash) {
 // 3. Minecraft Inventory Grid Setup
 // ==========================================
 const ITEM_ICONS = {
-  sword: '⚔️',
-  pickaxe: '⛏️',
-  axe: '🪓',
-  shovel: '🥄',
-  hoe: '🌱',
-  bow: '🏹',
-  crossbow: '🎯',
-  shield: '🛡️',
-  totem_of_undying: '🔮',
-  arrow: '🏹',
-  bread: '🍞',
-  beef: '🥩',
-  porkchop: '🥓',
-  golden_carrot: '🥕',
-  carrot: '🥕',
-  potato: '🥔',
-  baked_potato: '🥔',
-  apple: '🍎',
-  wheat: '🌾',
-  seed: '🌰',
-  coal: '⚫',
-  charcoal: '⚫',
-  iron: '⚪',
-  gold: '🟡',
-  diamond: '💎',
-  emerald: '🟢',
-  lapis: '🔵',
-  redstone: '🔴',
-  log: '🪵',
-  planks: '🪵',
-  cobblestone: '🪨',
-  dirt: '🟫',
-  torch: '🔦',
-  water_bucket: '🪣',
-  bucket: '🪣',
-  chest: '📦'
+  sword: '<svg viewBox="0 0 24 24" class="ui-icon item-svg"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/></svg>',
+  pickaxe: '<svg viewBox="0 0 24 24" class="ui-icon item-svg"><path d="m14 13-9.5 9.5a2.12 2.12 0 1 1-3-3L11 10"/><path d="m14 10 3-3a5 5 0 0 0 0-7l-1 1a5 5 0 0 1 0 7l-2 2z"/></svg>',
+  axe: '<svg viewBox="0 0 24 24" class="ui-icon item-svg"><path d="m14 12-8.5 8.5a2.12 2.12 0 1 1-3-3L11 9"/><path d="M15 13 9 7l4-4 6 6h3a8 8 0 0 1-7 7z"/></svg>',
+  shovel: '<svg viewBox="0 0 24 24" class="ui-icon item-svg"><path d="m14 14-8 8a2.12 2.12 0 0 1-3-3l8-8"/><path d="m15 11 4-4a4 4 0 0 0-6-6l-4 4 6 6z"/></svg>',
+  hoe: '<svg viewBox="0 0 24 24" class="ui-icon item-svg"><path d="M7 20h10"/><path d="M10 20c0-4.4 3.6-8 8-8"/></svg>',
+  bow: '<svg viewBox="0 0 24 24" class="ui-icon item-svg"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+  crossbow: '<svg viewBox="0 0 24 24" class="ui-icon item-svg"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" class="ui-icon item-svg"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  totem_of_undying: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-totem"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>',
+  arrow: '<svg viewBox="0 0 24 24" class="ui-icon item-svg"><line x1="5" x2="19" y1="19" y2="5"/><polyline points="10 5 19 5 19 14"/></svg>',
+  bread: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-food"><path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8Z"/><path d="M15 5 9.5 10.5a5 5 0 0 0-1.4 4.5l-4.6 4.6a2.12 2.12 0 1 0 3 3l4.6-4.6a5 5 0 0 0 4.5-1.4L21 11"/></svg>',
+  beef: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-food"><path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8Z"/><path d="M15 5 9.5 10.5a5 5 0 0 0-1.4 4.5l-4.6 4.6a2.12 2.12 0 1 0 3 3l4.6-4.6a5 5 0 0 0 4.5-1.4L21 11"/></svg>',
+  porkchop: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-food"><path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8Z"/><path d="M15 5 9.5 10.5a5 5 0 0 0-1.4 4.5l-4.6 4.6a2.12 2.12 0 1 0 3 3l4.6-4.6a5 5 0 0 0 4.5-1.4L21 11"/></svg>',
+  golden_carrot: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-gold"><path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8Z"/></svg>',
+  carrot: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-food"><path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8Z"/></svg>',
+  potato: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-food"><circle cx="12" cy="12" r="7"/></svg>',
+  baked_potato: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-food"><circle cx="12" cy="12" r="7"/></svg>',
+  apple: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-redstone"><circle cx="12" cy="12" r="7"/></svg>',
+  wheat: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-gold"><path d="M7 20h10"/><path d="M10 20c0-4.4 3.6-8 8-8"/></svg>',
+  coal: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-coal"><circle cx="12" cy="12" r="7"/></svg>',
+  charcoal: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-coal"><circle cx="12" cy="12" r="7"/></svg>',
+  iron: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-iron"><polygon points="6 3 18 3 22 9 12 21 2 9 6 3"/></svg>',
+  gold: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-gold"><polygon points="6 3 18 3 22 9 12 21 2 9 6 3"/></svg>',
+  diamond: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-diamond"><polygon points="6 3 18 3 22 9 12 21 2 9 6 3"/><line x1="2" x2="22" y1="9" y2="9"/></svg>',
+  emerald: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-emerald"><polygon points="12 2 21 8.5 17.5 19 6.5 19 3 8.5 12 2"/></svg>',
+  lapis: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-lapis"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5"/></svg>',
+  redstone: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-redstone"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>',
+  log: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-wood"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/></svg>',
+  planks: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-wood"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/></svg>',
+  cobblestone: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-coal"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>',
+  dirt: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-wood"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>',
+  torch: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-torch"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/></svg>',
+  water_bucket: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-water"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
+  bucket: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-water"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
+  chest: '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-chest"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>'
 };
 
+const DEFAULT_ITEM_SVG = '<svg viewBox="0 0 24 24" class="ui-icon item-svg item-chest"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>';
+
 function getItemIcon(name) {
-  if (!name) return '📦';
+  if (!name) return DEFAULT_ITEM_SVG;
   const lower = name.toLowerCase();
-  for (const [key, icon] of Object.entries(ITEM_ICONS)) {
-    if (lower.includes(key)) return icon;
+  for (const [key, iconSvg] of Object.entries(ITEM_ICONS)) {
+    if (lower.includes(key)) return iconSvg;
   }
-  return '📦';
+  return DEFAULT_ITEM_SVG;
 }
 
 function initInventoryGrid() {
@@ -287,7 +307,7 @@ function populateConfigForms(cfg) {
   // Header Audience Badge
   if (headerAudienceBadge && cfg.privacy?.audienceMode) {
     const mode = cfg.privacy.audienceMode;
-    headerAudienceBadge.textContent = mode === 'whisper_only' ? 'Whisper Only' : mode === 'whitelist_whisper' ? 'Whitelisted Whispers' : 'Public Chat';
+    headerAudienceBadge.textContent = mode === 'dynamic' ? 'Dynamic Channel' : mode === 'whisper_only' ? 'Whisper Only' : mode === 'whitelist_whisper' ? 'Whitelisted Whispers' : 'Public Chat';
   }
 
   // 1. Privacy Form
@@ -468,21 +488,21 @@ async function saveSettings(payload, submitBtn, successNotice) {
         submitBtn.textContent = 'Saved!';
         setTimeout(() => {
           submitBtn.disabled = false;
-          submitBtn.textContent = submitBtn.getAttribute('data-orig') || '💾 Save Settings';
+          submitBtn.innerHTML = submitBtn.getAttribute('data-orig') || 'Save Settings';
         }, 1000);
       }
     } else {
       showToast(result.error || 'Failed to save settings', 'error');
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.textContent = submitBtn.getAttribute('data-orig') || '💾 Save Settings';
+        submitBtn.innerHTML = submitBtn.getAttribute('data-orig') || 'Save Settings';
       }
     }
   } catch (err) {
     showToast('Failed to contact server API', 'error');
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.textContent = submitBtn.getAttribute('data-orig') || '💾 Save Settings';
+      submitBtn.innerHTML = submitBtn.getAttribute('data-orig') || 'Save Settings';
     }
   }
 }
@@ -490,7 +510,7 @@ async function saveSettings(payload, submitBtn, successNotice) {
 // 1. Privacy Form Submission
 if (privacyForm) {
   const btn = privacyForm.querySelector('button[type="submit"]');
-  if (btn) btn.setAttribute('data-orig', btn.textContent);
+  if (btn) btn.setAttribute('data-orig', btn.innerHTML);
 
   privacyForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -513,7 +533,7 @@ if (privacyForm) {
 // 2. Combat Form Submission
 if (combatForm) {
   const btn = combatForm.querySelector('button[type="submit"]');
-  if (btn) btn.setAttribute('data-orig', btn.textContent);
+  if (btn) btn.setAttribute('data-orig', btn.innerHTML);
 
   combatForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -540,7 +560,7 @@ if (combatForm) {
 // 3. Automation Form Submission
 if (automationForm) {
   const btn = automationForm.querySelector('button[type="submit"]');
-  if (btn) btn.setAttribute('data-orig', btn.textContent);
+  if (btn) btn.setAttribute('data-orig', btn.innerHTML);
 
   automationForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -569,7 +589,7 @@ if (automationForm) {
 // 4. Server & Movement Form Submission
 if (serverForm) {
   const btn = serverForm.querySelector('button[type="submit"]');
-  if (btn) btn.setAttribute('data-orig', btn.textContent);
+  if (btn) btn.setAttribute('data-orig', btn.innerHTML);
 
   serverForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -638,6 +658,15 @@ function connectSSE() {
     }
   });
 
+  evtSource.addEventListener('perceptionLog', (e) => {
+    try {
+      const entry = JSON.parse(e.data);
+      appendPerceptionLogEntry(entry);
+    } catch (err) {
+      console.error('Failed to parse perception log:', err);
+    }
+  });
+
   evtSource.onerror = () => {
     connIndicator.className = 'pulse-beacon beacon-offline';
     connText.textContent = 'Reconnecting...';
@@ -685,6 +714,66 @@ function renderTelemetry(data) {
     dimensionBadge.textContent = data.dimension.toUpperCase().replace('MINECRAFT:', '');
   }
 
+  // Sensory & Environmental Strip
+  if (data.environment) {
+    if (envBiome) envBiome.textContent = data.environment.biome || 'Scanning...';
+    if (envLight) {
+      const total = data.environment.light !== undefined ? data.environment.light : 15;
+      const blk = data.environment.blockLight !== undefined ? data.environment.blockLight : 0;
+      const sky = data.environment.skyLight !== undefined ? data.environment.skyLight : 15;
+      envLight.textContent = `${total} (Sky: ${sky}, Blk: ${blk})`;
+      envLight.className = 'env-val ' + (blk === 0 && (data.environment.solarPhase === 'Night') ? 'env-danger' : (total < 7 ? 'env-dim' : 'env-safe'));
+    }
+    if (envWeather) {
+      const solar = data.environment.solarPhase || 'Day';
+      const weather = data.environment.weather || 'Clear';
+      envWeather.textContent = `${solar} • ${weather}`;
+    }
+    if (envGround) {
+      envGround.textContent = data.environment.groundBlock || 'grass_block';
+    }
+  } else {
+    // Graceful fallback for prior bot instance
+    if (envBiome) envBiome.textContent = (data.dimension || 'Overworld').toUpperCase().replace('MINECRAFT:', '');
+    const isNight = (data.timeOfDay >= 13000 && data.timeOfDay <= 23000);
+    if (envLight) {
+      envLight.textContent = isNight ? '0 (Night • Danger)' : '15 (Day • Safe)';
+      envLight.className = 'env-val ' + (isNight ? 'env-danger' : 'env-safe');
+    }
+    if (envWeather) {
+      envWeather.textContent = `${isNight ? 'Night' : 'Day'} • ${data.isRaining ? 'Rain' : 'Clear'}`;
+    }
+    if (envGround) {
+      envGround.textContent = 'Detected (Solid)';
+    }
+  }
+
+  // Gaze & Line of sight
+  if (data.gaze) {
+    const gazeStr = data.gaze.name + (data.gaze.dist !== null && data.gaze.dist !== undefined ? ` (${data.gaze.dist}m)` : '');
+    if (gazeTargetName) gazeTargetName.textContent = gazeStr;
+    if (envCrosshair) envCrosshair.textContent = gazeStr;
+  }
+
+  // Facing orientation
+  if (envFacing) {
+    if (data.facing) {
+      envFacing.textContent = `${data.facing.cardinal} (Yaw ${data.facing.yawDeg}°, Pitch ${data.facing.pitchDeg}°)`;
+    } else if (data.yaw !== undefined) {
+      const yawDeg = Math.round(((data.yaw * 180 / Math.PI) % 360 + 360) % 360);
+      envFacing.textContent = `Facing (Yaw ${yawDeg}°)`;
+    }
+  }
+
+  // Render Visible Entities in Sight
+  renderVisibleEntities(data.visibleEntities || data.entities || []);
+
+  // Initial perception logs
+  if (data.perceptionLogs && perceptionFeed && allPerceptionEntries.length === 0) {
+    perceptionFeed.innerHTML = '';
+    data.perceptionLogs.forEach(entry => appendPerceptionLogEntry(entry, false));
+  }
+
   // Inventory render
   renderInventory(data.inventory || []);
 
@@ -695,13 +784,21 @@ function renderTelemetry(data) {
   }
 }
 
+const ARMOR_PLACEHOLDERS = {
+  5: '<svg viewBox="0 0 24 24" class="ui-icon armor-icon-ph"><path d="M12 2a8 8 0 0 0-8 8v4c0 3 2 6 8 8 6-2 8-5 8-8v-4a8 8 0 0 0-8-8z"/><path d="M4 10h16"/></svg>',
+  6: '<svg viewBox="0 0 24 24" class="ui-icon armor-icon-ph"><path d="M6 4 2 8v4l4 2v6h12v-6l4-2V8l-4-4-4 3h-4z"/></svg>',
+  7: '<svg viewBox="0 0 24 24" class="ui-icon armor-icon-ph"><path d="M6 3h12v7l-2 11h-3.5L12 11l-.5 10H8L6 10z"/></svg>',
+  8: '<svg viewBox="0 0 24 24" class="ui-icon armor-icon-ph"><path d="M4 4h6v9l3 2v5H4zm10 0h6v9l-3 2v5h-6z"/></svg>',
+  45: '<svg viewBox="0 0 24 24" class="ui-icon armor-icon-ph"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'
+};
+
 function renderInventory(items) {
   for (let i = 5; i <= 8; i++) {
     const el = document.getElementById(`slot-${i}`);
-    if (el) el.innerHTML = i === 5 ? '🪖' : i === 6 ? '👕' : i === 7 ? '👖' : '🥾';
+    if (el) el.innerHTML = ARMOR_PLACEHOLDERS[i] || '';
   }
   const offEl = document.getElementById('slot-45');
-  if (offEl) offEl.innerHTML = '🛡️';
+  if (offEl) offEl.innerHTML = ARMOR_PLACEHOLDERS[45] || '';
 
   for (let i = 9; i <= 44; i++) {
     const el = document.getElementById(`slot-${i}`);
@@ -804,16 +901,33 @@ function renderRadar(data) {
     ctx.setLineDash([]);
   }
 
-  // Draw Chest position
-  if (data.chest) {
-    const cdx = (data.chest.x - botX) * scale;
-    const cdz = (data.chest.z - botZ) * scale;
+  // Draw Registered Chests
+  const chestList = data.chests && Object.keys(data.chests).length > 0
+    ? Object.entries(data.chests)
+    : (data.chest ? [['default', data.chest]] : []);
+
+  const CHEST_COLORS = {
+    ores: '#38bdf8',
+    food: '#22c55e',
+    wood: '#f59e0b',
+    mob: '#ef4444',
+    building: '#a855f7',
+    default: '#ffcc00'
+  };
+
+  chestList.forEach(([cat, pos]) => {
+    if (!pos) return;
+    const cdx = (pos.x - botX) * scale;
+    const cdz = (pos.z - botZ) * scale;
     const cDist = Math.hypot(cdx, cdz);
     if (cDist < radius) {
-      ctx.fillStyle = '#ffcc00';
+      ctx.fillStyle = CHEST_COLORS[cat.toLowerCase()] || '#ffcc00';
       ctx.fillRect(centerX + cdx - 4, centerY + cdz - 4, 8, 8);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '8px sans-serif';
+      ctx.fillText(cat.toUpperCase(), centerX + cdx + 6, centerY + cdz + 4);
     }
-  }
+  });
 
   // Draw Home position
   if (data.home) {
@@ -957,9 +1071,181 @@ if (copyCoordsBtn) {
     if (latestTelemetry) {
       const str = `/tp ${Math.round(latestTelemetry.x)} ${Math.round(latestTelemetry.y)} ${Math.round(latestTelemetry.z)}`;
       navigator.clipboard.writeText(str).then(() => {
-        copyCoordsBtn.textContent = 'Copied!';
-        setTimeout(() => copyCoordsBtn.textContent = '📋 Copy', 1500);
+        copyCoordsBtn.innerHTML = '<svg viewBox="0 0 24 24" class="ui-icon mini-icon"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+        setTimeout(() => {
+          copyCoordsBtn.innerHTML = '<svg viewBox="0 0 24 24" class="ui-icon mini-icon"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg> Copy';
+        }, 1500);
       });
     }
   });
 }
+
+// ==========================================
+// 12. Visual Perception & Entities in Sight
+// ==========================================
+function renderVisibleEntities(entities) {
+  if (!entitiesSightList) return;
+
+  if (sightCountBadge) {
+    sightCountBadge.textContent = `${entities.length} visible`;
+  }
+
+  if (!entities || entities.length === 0) {
+    entitiesSightList.innerHTML = `
+      <div class="sight-empty-state">
+        <span class="empty-icon"><svg viewBox="0 0 24 24" class="ui-icon"><circle cx="12" cy="12" r="10"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg></span>
+        <span>No entities in direct sight line</span>
+      </div>
+    `;
+    return;
+  }
+
+  entitiesSightList.innerHTML = '';
+  entities.forEach(ent => {
+    const card = document.createElement('div');
+    const isThreat = !!ent.isHostile;
+    const isOwner = !!ent.isOwner;
+    card.className = `entity-sight-card ${isThreat ? 'is-threat' : ''} ${isOwner ? 'is-owner' : ''}`;
+
+    let iconSvg = '<svg viewBox="0 0 24 24" class="ui-icon ent-icon ent-passive"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3.5 4 6 2-2.5 4-4 4-6a4 4 0 0 0-4-4z"/><circle cx="12" cy="18" r="3"/></svg>';
+    if (ent.isPlayer) {
+      iconSvg = isOwner
+        ? '<svg viewBox="0 0 24 24" class="ui-icon ent-icon ent-owner"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+        : '<svg viewBox="0 0 24 24" class="ui-icon ent-icon ent-player"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+    } else if (isThreat) {
+      iconSvg = '<svg viewBox="0 0 24 24" class="ui-icon ent-icon ent-threat"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>';
+    } else if (ent.type === 'object' || (ent.name && (ent.name.includes('arrow') || ent.name.includes('item')))) {
+      iconSvg = '<svg viewBox="0 0 24 24" class="ui-icon ent-icon ent-item"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>';
+    }
+
+    let inFov = ent.inFov;
+    let bearing = ent.bearing;
+
+    if (bearing === undefined && latestTelemetry && latestTelemetry.x !== undefined && ent.x !== undefined) {
+      const yaw = latestTelemetry.yaw || 0;
+      const viewDirX = -Math.sin(yaw);
+      const viewDirZ = -Math.cos(yaw);
+      const dx = ent.x - latestTelemetry.x;
+      const dz = ent.z - latestTelemetry.z;
+      const d = ent.dist || Math.hypot(dx, dz) || 1;
+      const dot = viewDirX * (dx / d) + viewDirZ * (dz / d);
+      const cross = viewDirX * (dz / d) - viewDirZ * (dx / d);
+      const angleDiff = Math.round(Math.atan2(cross, dot) * 180 / Math.PI);
+      inFov = Math.abs(angleDiff) <= 45;
+      if (Math.abs(angleDiff) <= 25) bearing = 'Directly Ahead';
+      else if (angleDiff > 25 && angleDiff <= 110) bearing = 'Right';
+      else if (angleDiff < -25 && angleDiff >= -110) bearing = 'Left';
+      else bearing = 'Behind';
+    }
+
+    let fovClass = 'fov-peripheral';
+    let fovText = bearing || 'Peripheral';
+    if (inFov) {
+      fovClass = 'fov-direct';
+      fovText = `In View (${bearing || 'Ahead'})`;
+    } else if (bearing === 'Behind') {
+      fovClass = 'fov-behind';
+    }
+
+    card.innerHTML = `
+      <div class="entity-card-left">
+        <span class="entity-icon">${iconSvg}</span>
+        <div>
+          <div class="entity-card-name">${escapeHtml(ent.name)}</div>
+          <div class="entity-card-dist">${ent.dist !== undefined ? ent.dist + 'm' : ''}</div>
+        </div>
+      </div>
+      <div class="entity-card-right">
+        <span class="entity-fov-badge ${fovClass}">${fovText}</span>
+        ${isThreat ? '<span class="entity-tag-threat">THREAT</span>' : ''}
+        ${isOwner ? '<span class="chip-owner-tag">Owner</span>' : ''}
+      </div>
+    `;
+    entitiesSightList.appendChild(card);
+  });
+}
+
+// ==========================================
+// 13. Sensory & Perception Stream Logging
+// ==========================================
+function appendPerceptionLogEntry(entry, shouldScroll = true) {
+  if (!perceptionFeed) return;
+  allPerceptionEntries.push(entry);
+  if (allPerceptionEntries.length > 100) allPerceptionEntries.shift();
+
+  if (!matchesPerceptionFilter(entry, activePerceptionFilter)) return;
+
+  const el = createPerceptionLogElement(entry);
+  perceptionFeed.appendChild(el);
+
+  while (perceptionFeed.children.length > 100) {
+    perceptionFeed.removeChild(perceptionFeed.firstChild);
+  }
+
+  if (shouldScroll) {
+    perceptionFeed.scrollTop = perceptionFeed.scrollHeight;
+  }
+}
+
+function createPerceptionLogElement(entry) {
+  const el = document.createElement('div');
+  const cat = (entry.category || 'SENSORY').toLowerCase();
+  el.className = `perceive-entry cat-${cat}`;
+
+  let badgeClass = 'badge-sensory';
+  if (cat === 'threat') badgeClass = 'badge-threat';
+  else if (cat === 'sight') badgeClass = 'badge-sight';
+  else if (cat === 'focus') badgeClass = 'badge-focus';
+  else if (cat === 'env' || cat === 'environment') badgeClass = 'badge-env';
+  else if (cat === 'tactical') badgeClass = 'badge-tactical';
+  else if (cat === 'sys' || cat === 'system') badgeClass = 'badge-sys';
+
+  el.innerHTML = `
+    <span class="perceive-time">${entry.time || '--:--:--'}</span>
+    <span class="perceive-badge ${badgeClass}">[${(entry.category || 'SENSORY').toUpperCase()}]</span>
+    <span class="perceive-text">${escapeHtml(entry.message)}</span>
+  `;
+  return el;
+}
+
+function matchesPerceptionFilter(entry, filter) {
+  if (!filter || filter === 'all') return true;
+  const cat = (entry.category || '').toLowerCase();
+  if (filter === 'sight') {
+    return cat === 'sight' || cat === 'threat' || cat === 'focus' || cat === 'tactical';
+  }
+  if (filter === 'env') {
+    return cat === 'env' || cat === 'environment' || cat === 'sensory';
+  }
+  return true;
+}
+
+function reapplyPerceptionFilter() {
+  if (!perceptionFeed) return;
+  perceptionFeed.innerHTML = '';
+  allPerceptionEntries.forEach(entry => {
+    if (matchesPerceptionFilter(entry, activePerceptionFilter)) {
+      perceptionFeed.appendChild(createPerceptionLogElement(entry));
+    }
+  });
+  perceptionFeed.scrollTop = perceptionFeed.scrollHeight;
+}
+
+// Perception filter pill clicks
+perceptionFilterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    perceptionFilterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activePerceptionFilter = btn.getAttribute('data-filter') || 'all';
+    reapplyPerceptionFilter();
+  });
+});
+
+// Clear perception stream
+if (clearPerceptionBtn) {
+  clearPerceptionBtn.addEventListener('click', () => {
+    allPerceptionEntries = [];
+    if (perceptionFeed) perceptionFeed.innerHTML = '';
+  });
+}
+

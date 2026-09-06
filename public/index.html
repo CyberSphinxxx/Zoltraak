@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zoltraak | Autonomous Companion Dashboard</title>
+  <meta name="description" content="Real-time live telemetry, tactical radar, and command control center for Zoltraak autonomous Minecraft companion bot.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/dashboard.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header Bar -->
+    <header class="top-header">
+      <div class="brand-group">
+        <div class="bot-avatar-glow">
+          <span class="avatar-icon">🧙‍♂️</span>
+        </div>
+        <div class="brand-text">
+          <div class="title-row">
+            <h1 class="brand-title">ZOLTRAAK</h1>
+            <span id="stateBadge" class="badge mode-roam">ROAM</span>
+          </div>
+          <p class="brand-sub">Autonomous Minecraft Companion • Tactical Management Console</p>
+        </div>
+      </div>
+
+      <div class="header-status-bar">
+        <div class="status-pill">
+          <span id="connIndicator" class="pulse-beacon beacon-online"></span>
+          <span id="connText">Connected</span>
+        </div>
+        <div class="status-pill">
+          <span class="pill-label">Target:</span>
+          <span id="serverInfo" class="pill-val">localhost:25565</span>
+        </div>
+        <div class="status-pill">
+          <span class="pill-label">Owner:</span>
+          <span id="ownerInfo" class="pill-val">Owner</span>
+        </div>
+        <div class="status-pill audience-pill">
+          <span class="pill-label">Audience:</span>
+          <span id="headerAudienceBadge" class="pill-val highlight">Whisper Only</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tab Bar -->
+    <nav class="nav-tabs-bar">
+      <button class="nav-tab active" data-tab="hud">
+        <span class="tab-icon">🧭</span>
+        <span class="tab-title">Tactical HUD</span>
+      </button>
+      <button class="nav-tab" data-tab="privacy">
+        <span class="tab-icon">🔒</span>
+        <span class="tab-title">Privacy & Audience</span>
+      </button>
+      <button class="nav-tab" data-tab="combat">
+        <span class="tab-icon">⚔️</span>
+        <span class="tab-title">Combat & Defense</span>
+      </button>
+      <button class="nav-tab" data-tab="automation">
+        <span class="tab-icon">🚜</span>
+        <span class="tab-title">Automation & Survival</span>
+      </button>
+      <button class="nav-tab" data-tab="server">
+        <span class="tab-icon">⚙️</span>
+        <span class="tab-title">Server & Movement</span>
+      </button>
+    </nav>
+
+    <!-- Main Workspace with Tab Pages -->
+    <main class="main-workspace">
+
+      <!-- ============================================== -->
+      <!-- PAGE 1: TACTICAL HUD & LIVE CONSOLE            -->
+      <!-- ============================================== -->
+      <section id="page-hud" class="tab-page active">
+        <div class="dashboard-grid">
+
+          <!-- Column 1: Tactical Radar Minimap -->
+          <section class="dash-card radar-section">
+            <div class="card-header">
+              <div class="header-left">
+                <span class="card-icon">🧭</span>
+                <h2>Tactical Radar</h2>
+              </div>
+              <div class="radar-controls">
+                <label for="radarRange">Range:</label>
+                <select id="radarRange" class="styled-select">
+                  <option value="16">16m</option>
+                  <option value="24" selected>24m</option>
+                  <option value="36">36m</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="radar-canvas-container">
+              <canvas id="radarCanvas" width="340" height="340"></canvas>
+              <div class="radar-compass-rose">
+                <span class="comp-n">N</span>
+                <span class="comp-e">E</span>
+                <span class="comp-s">S</span>
+                <span class="comp-w">W</span>
+              </div>
+            </div>
+
+            <div class="radar-legend">
+              <div class="legend-item"><span class="dot dot-bot"></span> Bot</div>
+              <div class="legend-item"><span class="dot dot-owner"></span> Owner</div>
+              <div class="legend-item"><span class="dot dot-player"></span> Player</div>
+              <div class="legend-item"><span class="dot dot-hostile"></span> Hostile</div>
+              <div class="legend-item"><span class="dot dot-passive"></span> Animal</div>
+              <div class="legend-item"><span class="dot dot-chest"></span> Chest</div>
+              <div class="legend-item"><span class="dot dot-patrol"></span> Patrol</div>
+            </div>
+          </section>
+
+          <!-- Column 2: Live HUD Metrics & Inventory Grid -->
+          <section class="dash-card hud-section">
+            <div class="card-header">
+              <div class="header-left">
+                <span class="card-icon">📊</span>
+                <h2>Vitals & Storage</h2>
+              </div>
+              <div id="dimensionBadge" class="dimension-tag">OVERWORLD</div>
+            </div>
+
+            <!-- Health, Food Gauges -->
+            <div class="vitals-row">
+              <div class="vital-gauge health-gauge">
+                <div class="gauge-label">
+                  <span>❤️ Health</span>
+                  <span id="hpText" class="gauge-val">20 / 20</span>
+                </div>
+                <div class="progress-track">
+                  <div id="hpBar" class="progress-fill fill-health" style="width: 100%;"></div>
+                </div>
+              </div>
+
+              <div class="vital-gauge food-gauge">
+                <div class="gauge-label">
+                  <span>🍗 Hunger</span>
+                  <span id="foodText" class="gauge-val">20 / 20</span>
+                </div>
+                <div class="progress-track">
+                  <div id="foodBar" class="progress-fill fill-food" style="width: 100%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coordinates & Orientation Card -->
+            <div class="coords-card">
+              <div class="coord-item">
+                <span class="coord-k">X</span>
+                <span id="coordX" class="coord-v">0.0</span>
+              </div>
+              <div class="coord-item">
+                <span class="coord-k">Y</span>
+                <span id="coordY" class="coord-v">64.0</span>
+              </div>
+              <div class="coord-item">
+                <span class="coord-k">Z</span>
+                <span id="coordZ" class="coord-v">0.0</span>
+              </div>
+              <button id="copyCoordsBtn" class="mini-btn" title="Copy coordinates">📋 Copy</button>
+            </div>
+
+            <!-- Interactive Minecraft Inventory Grid -->
+            <div class="inventory-container">
+              <div class="inv-header">
+                <h3>Inventory</h3>
+                <span id="invCountBadge" class="inv-badge">0 / 36 slots</span>
+              </div>
+
+              <!-- Armor & Offhand Row -->
+              <div class="armor-row">
+                <div class="slot-wrap" data-slot="5" title="Helmet"><div id="slot-5" class="inv-slot armor-slot">🪖</div></div>
+                <div class="slot-wrap" data-slot="6" title="Chestplate"><div id="slot-6" class="inv-slot armor-slot">👕</div></div>
+                <div class="slot-wrap" data-slot="7" title="Leggings"><div id="slot-7" class="inv-slot armor-slot">👖</div></div>
+                <div class="slot-wrap" data-slot="8" title="Boots"><div id="slot-8" class="inv-slot armor-slot">🥾</div></div>
+                <div class="slot-wrap offhand-wrap" data-slot="45" title="Off-Hand"><div id="slot-45" class="inv-slot offhand-slot">🛡️</div></div>
+              </div>
+
+              <!-- 27 Main Inventory Slots -->
+              <div id="mainInvGrid" class="main-inv-grid"></div>
+
+              <!-- 9 Hotbar Slots -->
+              <div class="hotbar-label">HOTBAR</div>
+              <div id="hotbarGrid" class="hotbar-grid"></div>
+            </div>
+          </section>
+
+          <!-- Column 3: Quick Action Center & Live Terminal Console -->
+          <section class="dash-card action-console-section">
+            <div class="card-header">
+              <div class="header-left">
+                <span class="card-icon">⚡</span>
+                <h2>Action Control</h2>
+              </div>
+            </div>
+
+            <!-- One-Click Command Buttons -->
+            <div class="actions-grid">
+              <button class="cmd-btn btn-guard" data-cmd="guard"><span class="btn-icon">🛡️</span> Guard</button>
+              <button class="cmd-btn btn-farm" data-cmd="farm"><span class="btn-icon">🌾</span> Farm</button>
+              <button class="cmd-btn btn-lumber" data-cmd="lumber"><span class="btn-icon">🌲</span> Lumber</button>
+              <button class="cmd-btn btn-mine" data-cmd="mine diamond"><span class="btn-icon">⛏️</span> Mine</button>
+              <button class="cmd-btn btn-fish" data-cmd="fish"><span class="btn-icon">🎣</span> Fish</button>
+              <button class="cmd-btn btn-patrol" data-cmd="patrol"><span class="btn-icon">🏰</span> Patrol</button>
+              <button class="cmd-btn btn-archer" data-cmd="archer"><span class="btn-icon">🏹</span> Archer</button>
+              <button class="cmd-btn btn-smelt" data-cmd="smelt"><span class="btn-icon">🔥</span> Smelt</button>
+              <button class="cmd-btn btn-breed" data-cmd="breed"><span class="btn-icon">🐑</span> Breed</button>
+              <button class="cmd-btn btn-deposit" data-cmd="deposit"><span class="btn-icon">📦</span> Deposit</button>
+              <button class="cmd-btn btn-sleep" data-cmd="sleep"><span class="btn-icon">🛌</span> Sleep</button>
+              <button class="cmd-btn btn-stop" data-cmd="stop"><span class="btn-icon">🛑</span> Stop</button>
+            </div>
+
+            <!-- Live Terminal Feed -->
+            <div class="console-wrapper">
+              <div class="console-header">
+                <h3>Live Console & Chat</h3>
+                <button id="clearConsoleBtn" class="mini-btn">Clear</button>
+              </div>
+              <div id="consoleFeed" class="console-feed">
+                <div class="log-entry system"><span class="log-time">--:--:--</span> <span class="log-sender">[System]</span> Awaiting connection...</div>
+              </div>
+
+              <!-- Command Input Bar -->
+              <form id="cmdForm" class="cmd-input-bar">
+                <input type="text" id="cmdInput" placeholder="Send command or chat (e.g. guard, mine iron, hi)..." autocomplete="off">
+                <button type="submit" id="cmdSendBtn" class="send-btn">Send</button>
+              </form>
+            </div>
+          </section>
+
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- PAGE 2: PRIVACY & AUDIENCE SETTINGS            -->
+      <!-- ============================================== -->
+      <section id="page-privacy" class="tab-page">
+        <div class="page-container">
+          <div class="page-intro">
+            <div class="intro-icon">🔒</div>
+            <div>
+              <h2 class="page-title">Message Privacy & Audience Control</h2>
+              <p class="page-desc">Define who can hear Zoltraak's replies, manage trusted players who can give commands, and control bot discretion.</p>
+            </div>
+          </div>
+
+          <form id="privacyForm" class="settings-page-grid">
+
+            <!-- Card: Audience Mode -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <span class="card-lead-icon">📡</span>
+                <div>
+                  <h3>Message Audience Mode</h3>
+                  <p>Choose who receives messages and alerts generated by Zoltraak</p>
+                </div>
+              </div>
+
+              <div class="audience-options-grid">
+                <label class="audience-radio-card">
+                  <input type="radio" name="audienceMode" value="whisper_only" checked>
+                  <div class="radio-card-content">
+                    <div class="radio-header">
+                      <span class="radio-icon">🤫</span>
+                      <span class="radio-title">Whisper to Owner Only</span>
+                      <span class="badge badge-recommended">Default / Stealth</span>
+                    </div>
+                    <p class="radio-desc">Zoltraak sends 100% private whispers to the owner exclusively. No other server player can ever see bot messages.</p>
+                  </div>
+                </label>
+
+                <label class="audience-radio-card">
+                  <input type="radio" name="audienceMode" value="whitelist_whisper">
+                  <div class="radio-card-content">
+                    <div class="radio-header">
+                      <span class="radio-icon">👥</span>
+                      <span class="radio-title">Whitelisted Whispers</span>
+                      <span class="badge badge-team">Team Mode</span>
+                    </div>
+                    <p class="radio-desc">Zoltraak whispers privately to the owner AND all players added in the Trusted Whitelist below.</p>
+                  </div>
+                </label>
+
+                <label class="audience-radio-card">
+                  <input type="radio" name="audienceMode" value="public_chat">
+                  <div class="radio-card-content">
+                    <div class="radio-header">
+                      <span class="radio-icon">📢</span>
+                      <span class="radio-title">Public Server Chat</span>
+                      <span class="badge badge-broadcast">Broadcast</span>
+                    </div>
+                    <p class="radio-desc">Zoltraak broadcasts all replies into the global server chat where all players on the server can see them.</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Card: Whitelist Manager -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <span class="card-lead-icon">🛡️</span>
+                <div>
+                  <h3>Trusted Player Whitelist</h3>
+                  <p>Players on this list receive whispers in Team Mode and are authorized to issue commands to Zoltraak.</p>
+                </div>
+              </div>
+
+              <div class="whitelist-manager">
+                <div class="whitelist-input-row">
+                  <input type="text" id="whitelistInput" placeholder="Enter Minecraft username (e.g. Alex)..." autocomplete="off">
+                  <button type="button" id="addWhitelistBtn" class="modal-btn btn-primary">+ Add Player</button>
+                </div>
+
+                <div class="whitelist-tags-container" id="whitelistTags">
+                  <!-- Tag chips rendered by JS -->
+                </div>
+                <p class="field-hint">Tip: Owner is always automatically included and cannot be removed.</p>
+              </div>
+            </div>
+
+            <!-- Card: Discretion & Persona -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <span class="card-lead-icon">🎭</span>
+                <div>
+                  <h3>Discretion & Persona</h3>
+                  <p>Customize bot chattiness and messaging prefix</p>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="cfgBotPrefix">Bot Message Prefix</label>
+                  <input type="text" id="cfgBotPrefix" placeholder="[Zoltraak]" value="[Zoltraak]">
+                  <span class="field-hint">Prepended to outgoing messages (leave empty for bare text).</span>
+                </div>
+
+                <div class="form-group toggle-group flex-1">
+                  <div class="toggle-label-wrap">
+                    <label for="cfgSilentMode">Silent Mode</label>
+                    <span class="field-hint">Suppresses casual replies and routine confirmations; only alerts on danger, death, or critical events.</span>
+                  </div>
+                  <label class="switch-toggle">
+                    <input type="checkbox" id="cfgSilentMode">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Save Bar -->
+            <div class="settings-actions-bar">
+              <button type="submit" class="modal-btn btn-primary btn-large">💾 Save Privacy Settings</button>
+            </div>
+
+          </form>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- PAGE 3: COMBAT & DEFENSE SETTINGS              -->
+      <!-- ============================================== -->
+      <section id="page-combat" class="tab-page">
+        <div class="page-container">
+          <div class="page-intro">
+            <div class="intro-icon">⚔️</div>
+            <div>
+              <h2 class="page-title">Combat & Tactical Defense</h2>
+              <p class="page-desc">Configure reactive shield parrying against projectiles, creeper blast retreats, archer kiting, and totem failsafes.</p>
+            </div>
+          </div>
+
+          <form id="combatForm" class="settings-page-grid">
+
+            <!-- Card: Target Priority -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <span class="card-lead-icon">🎯</span>
+                <div>
+                  <h3>Target Priority & Engagement</h3>
+                  <p>Determine which entities Zoltraak engages in combat</p>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="cfgTargetPriority">Target Selection Rule</label>
+                <select id="cfgTargetPriority" class="styled-select large-select">
+                  <option value="hostiles_only" selected>Hostile Mobs Only (Zombies, Skeletons, Creepers, Spiders, etc.)</option>
+                  <option value="all_mobs">All Mobs (Hostile + Aggressive / Provoked)</option>
+                  <option value="player_defense">Player Defense Only (Only retaliate if Owner or Bot is damaged)</option>
+                </select>
+                <span class="field-hint">Player Defense Mode prevents Zoltraak from picking fights unless actively assaulted.</span>
+              </div>
+            </div>
+
+            <!-- Card: Reactive Defense & Parrying -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <span class="card-lead-icon">🛡️</span>
+                <div>
+                  <h3>Reactive Shield & Evasion</h3>
+                  <p>Parry incoming projectiles and deflect creeper explosions</p>
+                </div>
+              </div>
+
+              <div class="form-row align-center">
+                <div class="form-group toggle-group flex-1">
+                  <div class="toggle-label-wrap">
+                    <label for="cfgShieldParry">Reactive Projectile Parry</label>
+                    <span class="field-hint">Instantly raises offhand shield toward incoming arrows, tridents, and fireballs.</span>
+                  </div>
+                  <label class="switch-toggle">
+                    <input type="checkbox" id="cfgShieldParry" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="form-group toggle-group flex-1">
+                  <div class="toggle-label-wrap">
+                    <label for="cfgCreeperAvoid">Creeper Blast Sprint-Deflection</label>
+                    <span class="field-hint">Quickly sprints backward and shields when a creeper starts hissing within 6 blocks.</span>
+                  </div>
+                  <label class="switch-toggle">
+                    <input type="checkbox" id="cfgCreeperAvoid" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="slider-row">
+                <div class="slider-header">
+                  <label for="cfgParryDist">Shield Parry Reaction Distance</label>
+                  <span id="parryDistVal" class="slider-value-badge">10m</span>
+                </div>
+                <input type="range" id="cfgParryDist" min="4" max="18" step="1" value="10" class="custom-slider">
+                <span class="field-hint">Max distance to detect incoming airborne projectiles and snap shield to block angle.</span>
+              </div>
+            </div>
+
+            <!-- Card: Archer & Totem Stance -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <span class="card-lead-icon">🏹</span>
+                <div>
+                  <h3>Archer Stance & Totem Failsafe</h3>
+                  <p>Fine-tune ranged bow positioning and emergency totem swapping</p>
+                </div>
+              </div>
+
+              <div class="slider-row">
+                <div class="slider-header">
+                  <label for="cfgArcherKite">Archer Stance Kiting Distance</label>
+                  <span id="archerKiteVal" class="slider-value-badge">8m</span>
+                </div>
+                <input type="range" id="cfgArcherKite" min="4" max="16" step="1" value="8" class="custom-slider">
+                <span class="field-hint">Distance Zoltraak maintains from enemies while firing arrows before backing up.</span>
+              </div>
+
+              <div class="slider-row">
+                <div class="slider-header">
+                  <label for="cfgTotemHp">Totem of Undying Quick-Swap Threshold</label>
+                  <span id="totemHpVal" class="slider-value-badge">12 HP</span>
+                </div>
+                <input type="range" id="cfgTotemHp" min="4" max="18" step="1" value="12" class="custom-slider">
+                <span class="field-hint">Automatically equips a Totem of Undying to the off-hand slot when health drops below this value.</span>
+              </div>
+            </div>
+
+            <!-- Save Bar -->
+            <div class="settings-actions-bar">
+              <button type="submit" class="modal-btn btn-primary btn-large">💾 Save Combat Settings</button>
+            </div>
+
+          </form>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- PAGE 4: AUTOMATION & SURVIVAL SETTINGS         -->
+      <!-- ============================================== -->
+      <section id="page-automation" class="tab-page">
+        <div class="page-container">
+          <div class="page-intro">
+            <div class="intro-icon">🚜</div>
+            <div>
+              <h2 class="page-title">Automation & Resource Gathering</h2>
+              <p class="page-desc">Automate vital survival routines, sustainable tree-felling, underground strip-mining tunnels, and animal breeding.</p>
+            </div>
+          </div>
+
+          <form id="automationForm" class="settings-page-grid">
+
+            <!-- Card: Nutrition & Sleep -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <span class="card-lead-icon">🍗</span>
+                <div>
+                  <h3>Survival Vitals & Bedtime</h3>
+                  <p>Auto-nutrition management and nocturnal bed seeking</p>
+                </div>
+              </div>
+
+              <div class="slider-row">
+                <div class="slider-header">
+                  <label for="cfgAutoEat">Auto-Eat Hunger Threshold</label>
+                  <span id="autoEatVal" class="slider-value-badge">15 / 20</span>
+                </div>
+                <input type="range" id="cfgAutoEat" min="8" max="19" step="1" value="15" class="custom-slider">
+                <span class="field-hint">Zoltraak will automatically eat top-tier cooked food when hunger falls to or below this mark.</span>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group toggle-group flex-1">
+                  <div class="toggle-label-wrap">
+                    <label for="cfgAutoSleep">Auto-Sleep at Night / Storms</label>
+                    <span class="field-hint">Finds and rests in nearest bed during sunset or rainstorms to skip phantoms.</span>
+                  </div>
+                  <label class="switch-toggle">
+                    <input type="checkbox" id="cfgAutoSleep" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="form-group toggle-group flex-1">
+                  <div class="toggle-label-wrap">
+                    <label for="cfgAutoFarm">Autonomous Crop Farming</label>
+                    <span class="field-hint">Automatically inspects, harvests mature crops, and replants seeds when idle.</span>
+                  </div>
+                  <label class="switch-toggle">
+                    <input type="checkbox" id="cfgAutoFarm" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card: Forestry & Mining -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <span class="card-lead-icon">🌲</span>
+                <div>
+                  <h3>Forestry & Underground Excavation</h3>
+                  <p>Configure tree replanting and tunnel excavation parameters</p>
+                </div>
+              </div>
+
+              <div class="form-group toggle-group">
+                <div class="toggle-label-wrap">
+                  <label for="cfgReplant">Auto-Replant Saplings on Stumps</label>
+                  <span class="field-hint">Immediately places matching saplings on dirt blocks when chopping down tree trunks.</span>
+                </div>
+                <label class="switch-toggle">
+                  <input type="checkbox" id="cfgReplant" checked>
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              <div class="slider-row">
+                <div class="slider-header">
+                  <label for="cfgBranchLen">Default Strip-Mining Tunnel Length</label>
+                  <span id="branchLenVal" class="slider-value-badge">16 blocks</span>
+                </div>
+                <input type="range" id="cfgBranchLen" min="6" max="48" step="2" value="16" class="custom-slider">
+                <span class="field-hint">Number of blocks forward to dig during !tunnel commands.</span>
+              </div>
+
+              <div class="slider-row">
+                <div class="slider-header">
+                  <label for="cfgTorchSpacing">Tunnel Torch Interval</label>
+                  <span id="torchSpacingVal" class="slider-value-badge">6 blocks</span>
+                </div>
+                <input type="range" id="cfgTorchSpacing" min="3" max="12" step="1" value="6" class="custom-slider">
+                <span class="field-hint">Places safety illumination torches every N excavated blocks to prevent mob spawns.</span>
+              </div>
+
+              <div class="slider-row">
+                <div class="slider-header">
+                  <label for="cfgBreedLimit">Animal Pen Breeding Limit</label>
+                  <span id="breedLimitVal" class="slider-value-badge">12 animals</span>
+                </div>
+                <input type="range" id="cfgBreedLimit" min="4" max="32" step="2" value="12" class="custom-slider">
+                <span class="field-hint">Prevents overpopulation by halting breeding when an enclosure reaches this count.</span>
+              </div>
+            </div>
+
+            <!-- Save Bar -->
+            <div class="settings-actions-bar">
+              <button type="submit" class="modal-btn btn-primary btn-large">💾 Save Automation Settings</button>
+            </div>
+
+          </form>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- PAGE 5: SERVER & MOVEMENT SETTINGS             -->
+      <!-- ============================================== -->
+      <section id="page-server" class="tab-page">
+        <div class="page-container">
+          <div class="page-intro">
+            <div class="intro-icon">⚙️</div>
+            <div>
+              <h2 class="page-title">Server Connection & Movement Physics</h2>
+              <p class="page-desc">Manage Minecraft host IP, Radmin VPN address, port, and fine-tune escort pathfinding physics.</p>
+            </div>
+          </div>
+
+          <form id="serverForm" class="settings-page-grid">
+
+            <!-- Card: Minecraft Server Connection -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <span class="card-lead-icon">🌐</span>
+                <div>
+                  <h3>Server Connection & Identity</h3>
+                  <p>Target Minecraft server details and bot login credentials</p>
+                </div>
+              </div>
+
+              <div class="callout-tip">
+                <span class="tip-icon">💡</span>
+                <span><strong>Radmin VPN Tip:</strong> If your server is on a separate PC via Radmin VPN, enter that PC's Radmin IP (e.g. <code>26.234.86.53</code>) and server port (e.g. <code>25566</code>).</span>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-2">
+                  <label for="cfgHost">Server Host / IP Address</label>
+                  <input type="text" id="cfgHost" placeholder="26.234.86.53 or localhost" required>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="cfgPort">Server Port</label>
+                  <input type="number" id="cfgPort" placeholder="25566" required>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="cfgVersion">MC Version</label>
+                  <input type="text" id="cfgVersion" placeholder="1.21.2">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="cfgUsername">Bot Username</label>
+                  <input type="text" id="cfgUsername" placeholder="Zoltraak" required>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="cfgOwner">Owner Username</label>
+                  <input type="text" id="cfgOwner" placeholder="L3mxr" required>
+                </div>
+              </div>
+
+              <div class="reconnect-warning">
+                ⚠️ Modifying server IP, port, or usernames will trigger an automatic bot reconnection.
+              </div>
+            </div>
+
+            <!-- Card: Movement Physics & Navigation -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <span class="card-lead-icon">🏃</span>
+                <div>
+                  <h3>Navigation & Escort Physics</h3>
+                  <p>Tune walking behavior, step auto-jump assistant, and collision un-sticking</p>
+                </div>
+              </div>
+
+              <div class="slider-row">
+                <div class="slider-header">
+                  <label for="cfgFollowDist">Follow & Escort Distance</label>
+                  <span id="followDistVal" class="slider-value-badge">3.0m</span>
+                </div>
+                <input type="range" id="cfgFollowDist" min="1" max="8" step="0.5" value="3" class="custom-slider">
+                <span class="field-hint">Desired target proximity when following or guarding the owner.</span>
+              </div>
+
+              <div class="slider-row">
+                <div class="slider-header">
+                  <label for="cfgRoamRadius">Idle Roaming Radius</label>
+                  <span id="roamRadiusVal" class="slider-value-badge">16m</span>
+                </div>
+                <input type="range" id="cfgRoamRadius" min="6" max="48" step="2" value="16" class="custom-slider">
+                <span class="field-hint">Max wandering boundary around base home anchor during idle roaming.</span>
+              </div>
+
+              <div class="slider-row">
+                <div class="slider-header">
+                  <label for="cfgStuckTimeout">Anti-Stuck Watchdog Interval</label>
+                  <span id="stuckTimeoutVal" class="slider-value-badge">600ms</span>
+                </div>
+                <input type="range" id="cfgStuckTimeout" min="300" max="1500" step="50" value="600" class="custom-slider">
+                <span class="field-hint">Frequency of obstruction detection that triggers auto-step back and hop when obstructed.</span>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group toggle-group flex-1">
+                  <div class="toggle-label-wrap">
+                    <label for="cfgAutoJump">Auto-Jump Step Assistant</label>
+                    <span class="field-hint">Smoothly jumps when walking into 1-block steps with open overhead clearance.</span>
+                  </div>
+                  <label class="switch-toggle">
+                    <input type="checkbox" id="cfgAutoJump" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="form-group toggle-group flex-1">
+                  <div class="toggle-label-wrap">
+                    <label for="cfgSprinting">Allow Sprinting</label>
+                    <span class="field-hint">Enables running. <em>(Keep OFF on uneven terrain to prevent 1-block momentum lockups)</em>.</span>
+                  </div>
+                  <label class="switch-toggle">
+                    <input type="checkbox" id="cfgSprinting">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Save Bar -->
+            <div class="settings-actions-bar">
+              <button type="submit" class="modal-btn btn-primary btn-large">💾 Save Server & Movement Settings</button>
+            </div>
+
+          </form>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="dash-footer">
+      <span>Zoltraak v1.0.0 • Connected to Mineflayer Server-Sent Telemetry • MIT License</span>
+    </footer>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="/dashboard.js"></script>
+</body>
+</html>

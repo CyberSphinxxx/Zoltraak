@@ -1,0 +1,386 @@
+/* ==========================================================================
+   Component: Vitals, Coordinates & Minecraft Inventory HUD
+   ========================================================================== */
+
+.hud-section {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.hud-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hud-bar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hud-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bar-val {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #fff;
+}
+
+.progress-track {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-glass);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fill-health {
+  background: linear-gradient(90deg, #ff3366, #ff6b8b);
+  box-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+}
+
+.fill-food {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+/* Coordinates Card */
+.coords-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-glass);
+}
+
+.coord-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.coord-k {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary-accent);
+}
+
+.coord-v {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* Minecraft Inventory Grid */
+.inventory-container {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-glass);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inv-header h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.inv-badge {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.armor-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.offhand-wrap {
+  margin-left: 12px;
+}
+
+.inv-slot {
+  width: 36px;
+  height: 36px;
+  background: rgba(30, 41, 59, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-size: 16px;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.inv-slot:hover {
+  border-color: var(--primary-accent);
+  background: rgba(51, 65, 85, 0.8);
+  box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.inv-slot .item-count {
+  position: absolute;
+  bottom: 1px;
+  right: 2px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 1px 1px 2px #000;
+}
+
+.main-inv-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 6px;
+}
+
+.hotbar-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+.hotbar-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 6px;
+}
+
+/* Equipment Armor & Offhand Silhouettes */
+.inv-slot .armor-icon-ph {
+  width: 18px;
+  height: 18px;
+  color: rgba(255, 255, 255, 0.22);
+  stroke-width: 1.6;
+}
+
+.inv-slot .item-svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.6));
+}
+
+/* Item SVGs Accent Colors */
+.item-diamond { color: var(--primary-accent); filter: drop-shadow(0 0 6px var(--primary-glow)) !important; }
+.item-gold { color: #fbbf24; filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.7)) !important; }
+.item-emerald { color: #10b981; filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.7)) !important; }
+.item-redstone { color: #ff3366; filter: drop-shadow(0 0 6px rgba(255, 51, 102, 0.7)) !important; }
+.item-lapis { color: #38bdf8; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.7)) !important; }
+.item-coal { color: #94a3b8; }
+.item-iron { color: #e2e8f0; }
+.item-wood { color: #f97316; }
+.item-water { color: #06b6d4; filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.7)) !important; }
+.item-torch { color: #ffcc00; filter: drop-shadow(0 0 6px rgba(255, 204, 0, 0.7)) !important; }
+.item-food { color: #f59e0b; }
+.item-totem { color: var(--secondary-accent); filter: drop-shadow(0 0 8px var(--secondary-glow)) !important; }
+.item-chest { color: #fbbf24; }
+
+/* ── Filled slot interaction ───────────────────────────────── */
+.inv-slot-filled {
+  cursor: pointer;
+}
+
+.inv-slot-filled:hover {
+  border-color: var(--primary-accent) !important;
+  background: rgba(51, 65, 85, 0.9) !important;
+  box-shadow: 0 0 14px var(--primary-glow), inset 0 0 8px rgba(255,255,255,0.04) !important;
+  transform: scale(1.08);
+}
+
+.inv-slot-filled:hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.04);
+  pointer-events: none;
+}
+
+/* ── Slot feedback flashes ─────────────────────────────────── */
+@keyframes slotSuccess {
+  0%   { box-shadow: 0 0 0px #10b981; border-color: #10b981; }
+  50%  { box-shadow: 0 0 16px #10b981; border-color: #10b981; background: rgba(16,185,129,0.15); }
+  100% { box-shadow: 0 0 0px #10b981; }
+}
+@keyframes slotError {
+  0%   { box-shadow: 0 0 0px #ff3366; border-color: #ff3366; }
+  50%  { box-shadow: 0 0 16px #ff3366; border-color: #ff3366; background: rgba(255,51,102,0.15); }
+  100% { box-shadow: 0 0 0px #ff3366; }
+}
+
+.slot-feedback-success { animation: slotSuccess 0.7s ease forwards; }
+.slot-feedback-error   { animation: slotError 0.7s ease forwards; }
+
+/* ── Item Action Popup ─────────────────────────────────────── */
+.item-action-popup {
+  position: fixed;
+  z-index: 9999;
+  width: 224px;
+  background: var(--bg-card, #0f172a);
+  border: 1px solid var(--primary-accent);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.7), 0 0 24px var(--primary-glow-subtle);
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+  animation: popupIn 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: all;
+}
+
+@keyframes popupIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border-glass);
+  background: rgba(255,255,255,0.03);
+}
+
+.popup-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border-glass);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.popup-item-icon .item-svg {
+  width: 18px;
+  height: 18px;
+}
+
+.popup-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.popup-item-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: capitalize;
+}
+
+.popup-item-count {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.popup-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s, background 0.2s;
+  flex-shrink: 0;
+}
+
+.popup-close-btn:hover {
+  color: #ff3366;
+  background: rgba(255, 51, 102, 0.1);
+}
+
+.popup-actions {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.popup-divider {
+  height: 1px;
+  background: var(--border-glass);
+  margin: 4px 0;
+}
+
+.popup-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-main);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.popup-action-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+
+/* Drop buttons get a subtle red tint on hover */
+#popupDrop1:hover,
+#popupDropAll:hover {
+  background: rgba(255, 51, 102, 0.12);
+  color: #ff6b8b;
+}
+
+/* Equip buttons get accent color */
+#popupEquipHand:hover,
+#popupEquipOffhand:hover {
+  background: rgba(var(--primary-accent-rgb, 99, 179, 237), 0.12);
+  color: var(--primary-accent);
+}
+

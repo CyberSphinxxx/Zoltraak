@@ -13,6 +13,7 @@ Thumbs.db
 
 # Optional local overrides & secrets
 *.tmp
+config.json
 .env
 .env.local
 .env.*.local

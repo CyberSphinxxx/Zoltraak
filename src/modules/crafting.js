@@ -3,12 +3,19 @@ const { goals } = require('mineflayer-pathfinder');
 async function craftItem(ctx, itemName, count = 1) {
   const { bot, state, mcData } = ctx;
   if (!bot || !bot.inventory || state.isCrafting) return false;
+  if (!itemName || typeof itemName !== 'string') return false;
 
-  const itemDef = mcData.itemsByName[itemName.toLowerCase()];
+  const data = mcData || ctx.mcData;
+  if (!data || !data.itemsByName) return false;
+
+  const itemDef = data.itemsByName[itemName.toLowerCase()];
   if (!itemDef) {
     console.log(`[Zoltraak Crafting] Unknown item name: ${itemName}`);
     return false;
   }
+
+  const rawCount = parseInt(count, 10);
+  const actualCount = (!isNaN(rawCount) && rawCount > 0) ? Math.min(64, rawCount) : 1;
 
   state.isCrafting = true;
   const prev = state.currentState;
@@ -21,48 +28,41 @@ async function craftItem(ctx, itemName, count = 1) {
       maxDistance: 16
     });
 
-    const recipes = bot.recipesFor(itemDef.id, null, count, craftingTable);
+    const recipes = bot.recipesFor(itemDef.id, null, actualCount, craftingTable);
     if (!recipes || recipes.length === 0) {
       // Check if we can craft in 2x2 without table
-      const recipes2x2 = bot.recipesFor(itemDef.id, null, count, null);
+      const recipes2x2 = bot.recipesFor(itemDef.id, null, actualCount, null);
       if (!recipes2x2 || recipes2x2.length === 0) {
         console.log(`[Zoltraak Crafting] No valid recipe or missing ingredients for ${itemName}.`);
-        state.isCrafting = false;
-        state.currentState = prev === 'CRAFTING' ? 'ROAM' : prev;
         return false;
       }
-      console.log(`[Zoltraak Crafting] Crafting ${count}x ${itemName} in 2x2 grid...`);
-      await bot.craft(recipes2x2[0], count, null);
-      console.log(`[Zoltraak Crafting] Successfully crafted ${count}x ${itemName}.`);
-      state.isCrafting = false;
-      state.currentState = prev === 'CRAFTING' ? 'ROAM' : prev;
+      console.log(`[Zoltraak Crafting] Crafting ${actualCount}x ${itemName} in 2x2 grid...`);
+      await bot.craft(recipes2x2[0], actualCount, null);
+      console.log(`[Zoltraak Crafting] Successfully crafted ${actualCount}x ${itemName}.`);
       return true;
     }
 
     if (recipes[0].requiresTable) {
       if (!craftingTable) {
         console.log(`[Zoltraak Crafting] ${itemName} requires a crafting table, but none found nearby.`);
-        state.isCrafting = false;
-        state.currentState = prev === 'CRAFTING' ? 'ROAM' : prev;
         return false;
       }
       await bot.pathfinder.goto(new goals.GoalNear(craftingTable.position.x, craftingTable.position.y, craftingTable.position.z, 2));
-      console.log(`[Zoltraak Crafting] Crafting ${count}x ${itemName} at workbench...`);
-      await bot.craft(recipes[0], count, craftingTable);
+      console.log(`[Zoltraak Crafting] Crafting ${actualCount}x ${itemName} at workbench...`);
+      await bot.craft(recipes[0], actualCount, craftingTable);
     } else {
-      await bot.craft(recipes[0], count, null);
+      await bot.craft(recipes[0], actualCount, null);
     }
 
-    console.log(`[Zoltraak Crafting] Finished crafting ${count}x ${itemName}!`);
-    state.isCrafting = false;
-    state.currentState = prev === 'CRAFTING' ? 'ROAM' : prev;
+    console.log(`[Zoltraak Crafting] Finished crafting ${actualCount}x ${itemName}!`);
     return true;
 
   } catch (err) {
     console.log('[Zoltraak Crafting] Craft error: ' + err.message);
+    return false;
+  } finally {
     state.isCrafting = false;
     state.currentState = prev === 'CRAFTING' ? 'ROAM' : prev;
-    return false;
   }
 }
 

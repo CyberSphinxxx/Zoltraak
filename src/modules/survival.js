@@ -63,8 +63,12 @@ function trySleepInBed(ctx) {
 
   bot.pathfinder.setGoal(new goals.GoalGetToBlock(bedBlock.position.x, bedBlock.position.y, bedBlock.position.z));
 
+  let attempts = 0;
+  const maxAttempts = 30; // Max 15 seconds to reach bed
+
   const checkNearBed = setInterval(async () => {
-    if (!bot.entity) {
+    attempts++;
+    if (!bot || !bot.entity || attempts >= maxAttempts) {
       clearInterval(checkNearBed);
       return;
     }

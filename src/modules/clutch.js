@@ -6,6 +6,7 @@ let isExecutingClutch = false;
 function setupClutchListener(ctx) {
   const { bot } = ctx;
   if (!bot) return;
+  isExecutingClutch = false; // Reset lock on listener initialization
 
   bot.on('physicsTick', async () => {
     if (!clutchEnabled || isExecutingClutch || !bot.entity) return;

@@ -68,14 +68,17 @@ async function performPatrolStep(ctx) {
   const currentWp = state.patrolWaypoints[state.currentPatrolIndex];
   if (!currentWp) return;
 
-  const distToWp = bot.entity.position.distanceTo(currentWp);
-  if (distToWp <= 2.5) {
+  const dx = bot.entity.position.x - currentWp.x;
+  const dz = bot.entity.position.z - currentWp.z;
+  const horizDist = Math.hypot(dx, dz);
+
+  if (horizDist <= 3.0) {
     // Advance to next waypoint
     state.currentPatrolIndex = (state.currentPatrolIndex + 1) % state.patrolWaypoints.length;
     const nextWp = state.patrolWaypoints[state.currentPatrolIndex];
-    bot.pathfinder.setGoal(new goals.GoalNear(nextWp.x, nextWp.y, nextWp.z, 1.5));
+    bot.pathfinder.setGoal(new goals.GoalNearXZ(nextWp.x, nextWp.z, 2.0));
   } else {
-    bot.pathfinder.setGoal(new goals.GoalNear(currentWp.x, currentWp.y, currentWp.z, 1.5));
+    bot.pathfinder.setGoal(new goals.GoalNearXZ(currentWp.x, currentWp.z, 2.0));
   }
 }
 

@@ -157,7 +157,8 @@ async function digTunnel(ctx, steps = null) {
   const { bot, state, config } = ctx;
   if (!bot || !bot.entity || state.isMining) return;
 
-  const actualSteps = steps || config?.automation?.mineBranchLength || 16;
+  const parsedSteps = parseInt(steps, 10);
+  const actualSteps = (!isNaN(parsedSteps) && parsedSteps > 0) ? Math.min(64, parsedSteps) : (config?.automation?.mineBranchLength || 16);
   const torchInterval = config?.automation?.mineTorchSpacing || 6;
 
   state.isMining = true;
@@ -165,6 +166,7 @@ async function digTunnel(ctx, steps = null) {
 
   try {
     // Determine forward vector based on bot yaw rounded to 90 degrees
+    const yaw = bot.entity.yaw || 0;
     const forwardX = -Math.round(Math.sin(yaw));
     const forwardZ = -Math.round(Math.cos(yaw));
     const forwardDir = new Vec3(forwardX, 0, forwardZ);
@@ -217,9 +219,9 @@ async function digTunnel(ctx, steps = null) {
 
   } catch (err) {
     console.log('[Zoltraak Mining] Tunnel error: ' + err.message);
+  } finally {
+    state.isMining = false;
   }
-
-  state.isMining = false;
 }
 
 module.exports = {

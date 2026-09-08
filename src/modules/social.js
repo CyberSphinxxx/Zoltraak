@@ -179,34 +179,33 @@ async function executeShiftGreeting(ctx, targetPlayer, reason = 'crouch') {
     ctx.addPerceptionLog('SIGHT', `Player ${playerName} crouched in greeting - returning shift bow`);
   }
 
-  // Temporarily pause pathfinding movement so pathfinder doesn't reset sneak
   const pathfinderActive = bot.pathfinder && bot.pathfinder.isMoving();
-  if (pathfinderActive) {
-    try {
-      bot.pathfinder.stop();
-    } catch (e) {}
-  }
 
   try {
-    // 1. Look at player's eye level
+    // 1. Look towards player's eye level (non-blocking if moving)
     const targetHeadPos = targetPlayer.position.offset(0, (targetPlayer.height || 1.8) * 0.85, 0);
-    bot.lookAt(targetHeadPos, true);
+    bot.lookAt(targetHeadPos, !pathfinderActive);
 
-    // 2. First crouch (~150ms)
-    bot.setControlState('sneak', true);
-    await waitTicks(bot, 3);
+    if (pathfinderActive) {
+      // Dynamic moving shift greeting: quick crouch-tap & arm wave without stopping pathfinder
+      bot.setControlState('sneak', true);
+      await waitTicks(bot, 2);
+      bot.setControlState('sneak', false);
+      bot.swingArm();
+    } else {
+      // Full stationary greeting: respectful double crouch & wave
+      bot.setControlState('sneak', true);
+      await waitTicks(bot, 3);
 
-    // 3. Stand up briefly (~100ms)
-    bot.setControlState('sneak', false);
-    await waitTicks(bot, 2);
+      bot.setControlState('sneak', false);
+      await waitTicks(bot, 2);
 
-    // 4. Second crouch (~150ms)
-    bot.setControlState('sneak', true);
-    await waitTicks(bot, 3);
+      bot.setControlState('sneak', true);
+      await waitTicks(bot, 3);
 
-    // 5. Stand up & friendly arm swing
-    bot.setControlState('sneak', false);
-    bot.swingArm();
+      bot.setControlState('sneak', false);
+      bot.swingArm();
+    }
   } catch (err) {
     console.log('[Zoltraak Social] Shift greeting notice:', err.message);
   } finally {

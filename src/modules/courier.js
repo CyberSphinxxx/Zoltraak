@@ -4,10 +4,14 @@ const { goals } = require('mineflayer-pathfinder');
 async function deliverItemToOwner(ctx, itemName, count = 1, isWhisper = true, targetPlayer = null) {
   const { bot, state, config } = ctx;
   if (!bot || state.isDelivering) return;
+  if (!itemName || typeof itemName !== 'string') return;
+
+  const rawCount = parseInt(count, 10);
+  const actualCount = (!isNaN(rawCount) && rawCount > 0) ? Math.min(64, rawCount) : 1;
 
   const ownerName = targetPlayer || config.owner;
   const owner = bot.players[ownerName]?.entity;
-  if (!owner) {
+  if (!owner || !owner.position) {
     ctx.sendReply("I can't see your coordinates right now. Come closer so I can find you!", isWhisper, targetPlayer);
     return;
   }
@@ -15,7 +19,7 @@ async function deliverItemToOwner(ctx, itemName, count = 1, isWhisper = true, ta
   state.isDelivering = true;
   const prev = state.currentState;
   state.currentState = 'COURIER';
-  ctx.sendReply(`Got it, fetching ${count}x ${itemName} for you...`, isWhisper, targetPlayer);
+  ctx.sendReply(`Got it, fetching ${actualCount}x ${itemName} for you...`, isWhisper, targetPlayer);
 
   try {
     const query = itemName.toLowerCase();
@@ -23,7 +27,7 @@ async function deliverItemToOwner(ctx, itemName, count = 1, isWhisper = true, ta
     let invTotal = foundInInv.reduce((sum, item) => sum + item.count, 0);
 
     // If not enough in inventory, try fetching from base chest
-    if (invTotal < count) {
+    if (invTotal < actualCount) {
       const cPos = state.chestPos || (config.chest ? new Vec3(config.chest.x, config.chest.y, config.chest.z) : null);
       if (cPos) {
         console.log(`[Zoltraak Courier] Fetching ${itemName} from chest at ${cPos}...`);
@@ -34,7 +38,7 @@ async function deliverItemToOwner(ctx, itemName, count = 1, isWhisper = true, ta
           await bot.waitForTicks(8);
           const match = chestWindow.containerItems().find(i => i.name.includes(query));
           if (match) {
-            const need = Math.min(count - invTotal, match.count);
+            const need = Math.min(actualCount - invTotal, match.count);
             await chestWindow.withdraw(match.type, null, need);
             await bot.waitForTicks(4);
             console.log(`[Zoltraak Courier] Withdrew ${need}x ${match.name} from chest.`);
@@ -50,18 +54,23 @@ async function deliverItemToOwner(ctx, itemName, count = 1, isWhisper = true, ta
 
     if (invTotal === 0) {
       ctx.sendReply(`Sorry, couldn't find any ${itemName} in my bag or base storage!`, isWhisper, targetPlayer);
-      state.isDelivering = false;
-      state.currentState = prev === 'COURIER' ? 'ROAM' : prev;
+      return;
+    }
+
+    // Re-verify target player entity before pathfinding
+    const currentOwner = bot.players[ownerName]?.entity;
+    if (!currentOwner || !currentOwner.position) {
+      ctx.sendReply(`I retrieved the ${itemName}, but I lost sight of you! Come find me.`, isWhisper, targetPlayer);
       return;
     }
 
     // Path to owner's current position
     console.log(`[Zoltraak Courier] Delivering to ${ownerName}...`);
-    await bot.pathfinder.goto(new goals.GoalFollow(owner, 2));
+    await bot.pathfinder.goto(new goals.GoalFollow(currentOwner, 2));
 
     // Look at owner and drop item
-    await bot.lookAt(owner.position.offset(0, 1, 0));
-    let remainingToDrop = Math.min(count, invTotal);
+    await bot.lookAt(currentOwner.position.offset(0, 1, 0));
+    let remainingToDrop = Math.min(actualCount, invTotal);
 
     for (const item of foundInInv) {
       if (remainingToDrop <= 0) break;
@@ -72,14 +81,14 @@ async function deliverItemToOwner(ctx, itemName, count = 1, isWhisper = true, ta
     }
 
     ctx.sendReply('Here you go!', isWhisper, targetPlayer);
-    console.log(`[Zoltraak Courier] Delivered ${count}x ${itemName} to ${ownerName}.`);
+    console.log(`[Zoltraak Courier] Delivered ${actualCount}x ${itemName} to ${ownerName}.`);
 
   } catch (err) {
     console.log('[Zoltraak Courier] Delivery error: ' + err.message);
+  } finally {
+    state.isDelivering = false;
+    state.currentState = prev === 'COURIER' ? 'ROAM' : prev;
   }
-
-  state.isDelivering = false;
-  state.currentState = prev === 'COURIER' ? 'ROAM' : prev;
 }
 
 module.exports = {

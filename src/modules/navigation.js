@@ -1,6 +1,7 @@
 const { Movements, goals } = require('mineflayer-pathfinder');
 
 let stuckWatchdog = null;
+let followInterval = null;
 let guardFollowInterval = null;
 let lastJumpTime = 0;
 
@@ -11,55 +12,91 @@ function setupMovements(bot, mcData, config = {}) {
   const defaultMove = new Movements(bot, mcData);
   defaultMove.canDig = false;          // Never punch player structures
   defaultMove.allowParkour = true;     // Allow gap-jumps (needed for guard + terrain)
-  defaultMove.allowSprinting = true;   // Always sprint — guard mode needs it
+  defaultMove.allowSprinting = bot.food === undefined || bot.food > 6;
   defaultMove.canOpenDoors = true;
   bot.pathfinder.setMovements(defaultMove);
 
-  // ── Auto-Jump Assistant ──────────────────────────────────────
-  // Proactively detects a 1-block step ahead and jumps before
-  // hitting it, making movement feel smooth and natural.
-  bot.on('physicsTick', () => {
-    if (!bot.entity) return;
-    if (config.navigation?.autoJumpAssist === false) return;
-
-    const now = Date.now();
-    const cooldown = 300; // ms between jumps to prevent spam on slopes
-    if (now - lastJumpTime < cooldown) return;
-
-    const pos = bot.entity.position;
-    const yaw = bot.entity.yaw;
-    const isMoving = bot.pathfinder && bot.pathfinder.isMoving();
-    const movingForward = bot.controlState?.forward || isMoving;
-
-    if (!movingForward) return;
-
-    // Check the block directly in front (1m ahead, projected by yaw)
-    const frontDx = -Math.sin(yaw);
-    const frontDz = -Math.cos(yaw);
-    const frontBlock = bot.blockAt(pos.offset(frontDx * 0.8, 0, frontDz * 0.8));
-    const stepBlock = bot.blockAt(pos.offset(frontDx * 0.8, 1, frontDz * 0.8));
-    const headClear = bot.blockAt(pos.offset(0, 2, 0));
-
-    const stepIsBlocker = frontBlock && frontBlock.boundingBox === 'block';
-    const stepTopIsOpen = !stepBlock || stepBlock.boundingBox !== 'block';
-    const headIsClear = !headClear || headClear.boundingBox !== 'block';
-
-    // Also trigger on horizontal collision (fallback)
-    const collidedAndMoving = bot.entity.isCollidedHorizontally && isMoving;
-
-    if ((stepIsBlocker && stepTopIsOpen && headIsClear) || (collidedAndMoving && headIsClear)) {
-      if (bot.entity.onGround) {
-        lastJumpTime = now;
-        bot.setControlState('jump', true);
-        setTimeout(() => {
-          if (bot && bot.entity) bot.setControlState('jump', false);
-        }, 250); // 250ms hold to fully clear a 1-block step
-      }
+  // Dynamically synchronize sprinting capability with hunger level
+  bot.on('health', () => {
+    if (bot.pathfinder?.movements) {
+      bot.pathfinder.movements.allowSprinting = bot.food === undefined || bot.food > 6;
     }
   });
 
-  // ── Anti-Stuck Watchdog ───────────────────────────────────────
-  // Checks every 500ms if the bot is supposed to be moving but isn't.
+  // ── Auto-Jump Assistant & Aquatic Traversal ──────────────────
+  bot.on('physicsTick', () => {
+    if (!bot.entity) return;
+
+    const inWater = bot.entity.isInWater || (bot.blockAt(bot.entity.position)?.name === 'water');
+    const isMoving = bot.pathfinder && bot.pathfinder.isMoving();
+    const movingForward = bot.controlState?.forward || isMoving;
+
+    // ── Aquatic Traversal & Anti-Drowning ──
+    if (inWater) {
+      // 1. Emergency anti-drowning: If oxygen is low, swim upward immediately
+      if (bot.oxygenLevel !== null && bot.oxygenLevel !== undefined && bot.oxygenLevel < 15) {
+        bot.setControlState('jump', true);
+        return;
+      }
+
+      // 2. Buoyancy: Maintain surface swimming whenever moving
+      if (movingForward) {
+        bot.setControlState('jump', true);
+      }
+
+      // 3. Shore Step-Up: If bumping against underwater shore edge, boost forward + jump
+      if (bot.entity.isCollidedHorizontally && movingForward) {
+        bot.setControlState('forward', true);
+        bot.setControlState('jump', true);
+      }
+      return;
+    }
+
+    // ── Auto-Jump Assistant (Land) ──
+    if (config.navigation?.autoJumpAssist === false) return;
+
+    const now = Date.now();
+    const cooldown = 300; // ms between auto-jumps to avoid slope bouncing
+    if (now - lastJumpTime < cooldown) return;
+    if (!movingForward || !bot.entity.onGround) return;
+
+    const pos = bot.entity.position;
+    const vel = bot.entity.velocity;
+    const horizSpeed = Math.hypot(vel.x, vel.z);
+
+    // Use movement velocity vector if active, otherwise fallback to entity yaw
+    let moveAngle = bot.entity.yaw;
+    if (horizSpeed > 0.05) {
+      moveAngle = Math.atan2(-vel.x, -vel.z);
+    }
+
+    const frontDx = -Math.sin(moveAngle);
+    const frontDz = -Math.cos(moveAngle);
+
+    const frontBlock = bot.blockAt(pos.offset(frontDx * 0.75, 0, frontDz * 0.75));
+    const stepBlock = bot.blockAt(pos.offset(frontDx * 0.75, 1, frontDz * 0.75));
+    const stepHeadBlock = bot.blockAt(pos.offset(frontDx * 0.75, 2, frontDz * 0.75));
+    const overheadBlock = bot.blockAt(pos.offset(0, 2, 0));
+
+    const stepIsBlocker = frontBlock && frontBlock.boundingBox === 'block';
+    const stepTopIsOpen = !stepBlock || stepBlock.boundingBox !== 'block';
+    const stepHeadIsOpen = !stepHeadBlock || stepHeadBlock.boundingBox !== 'block';
+    const overheadIsOpen = !overheadBlock || overheadBlock.boundingBox !== 'block';
+    const collidedAndMoving = bot.entity.isCollidedHorizontally && isMoving;
+
+    // Only auto-jump if there is a 1-block obstacle with adequate clearance for head and landing
+    if (((stepIsBlocker && stepTopIsOpen && stepHeadIsOpen) || (collidedAndMoving && stepTopIsOpen)) && overheadIsOpen) {
+      lastJumpTime = now;
+      bot.setControlState('jump', true);
+      setTimeout(() => {
+        if (bot && bot.entity) {
+          bot.setControlState('jump', false);
+        }
+      }, 220);
+    }
+  });
+
+  // ── Progressive Multi-Tier Anti-Stuck Watchdog ────────────────
   if (stuckWatchdog) clearInterval(stuckWatchdog);
   let lastPos = null;
   let stuckCounter = 0;
@@ -73,29 +110,66 @@ function setupMovements(bot, mcData, config = {}) {
       if (lastPos) {
         const dist = currentPos.distanceTo(lastPos);
 
-        if (dist < 0.06) { // Moved less than 6cm — likely stuck
+        if (dist < 0.08) {
           stuckCounter++;
 
-          if (stuckCounter === 1) {
-            // First miss: try a jump to hop over obstacle
+          const inWater = bot.entity.isInWater || (bot.blockAt(bot.entity.position)?.name === 'water');
+
+          if (stuckCounter === 2) {
+            // Tier 1 (~1.0s): Micro-hop to clear carpets, trapdoors, or slight steps
+            if (bot.entity.onGround || inWater) {
+              bot.setControlState('jump', true);
+              setTimeout(() => { if (bot?.entity) bot.setControlState('jump', false); }, 200);
+            }
+          } else if (stuckCounter === 4) {
+            // Tier 2 (~2.0s): Micro-strafe wiggle to unclip from corners/fences
+            const strafeDir = (stuckCounter % 4 === 0) ? 'left' : 'right';
+            bot.setControlState(strafeDir, true);
+            setTimeout(() => {
+              if (bot?.entity) bot.setControlState(strafeDir, false);
+            }, 180);
+          } else if (stuckCounter === 6) {
+            // Tier 3 (~3.0s): Proactive door/gate/trapdoor interaction
+            const yaw = bot.entity.yaw;
+            const frontDx = -Math.sin(yaw);
+            const frontDz = -Math.cos(yaw);
+            const scanOffsets = [
+              currentPos.offset(0, 0, 0),
+              currentPos.offset(0, 1, 0),
+              currentPos.offset(frontDx, 0, frontDz),
+              currentPos.offset(frontDx, 1, frontDz)
+            ];
+
+            for (const offset of scanOffsets) {
+              const b = bot.blockAt(offset);
+              if (b && (b.name.includes('door') || b.name.includes('gate') || b.name.includes('trapdoor'))) {
+                try { bot.activateBlock(b).catch(() => {}); } catch (e) {}
+                break;
+              }
+            }
             bot.setControlState('jump', true);
-            setTimeout(() => { if (bot) bot.setControlState('jump', false); }, 250);
-          } else if (stuckCounter === 3) {
-            // Still stuck after 3 intervals: step back and recalculate
-            console.log('[Zoltraak Nav] Path obstructed — stepping back to unstick...');
-            bot.pathfinder.stop();
-            bot.clearControlStates();
+            setTimeout(() => { if (bot?.entity) bot.setControlState('jump', false); }, 220);
+          } else if (stuckCounter === 8) {
+            // Tier 4 (~4.0s): Backward nudge + non-destructive goal re-pathing
+            console.log('[Zoltraak Nav] Path obstructed — nudging back and recalculating route...');
             bot.setControlState('back', true);
             setTimeout(() => {
-              if (bot) {
-                bot.clearControlStates();
-                stuckCounter = 0;
+              if (bot?.entity) {
+                bot.setControlState('back', false);
+                const activeGoal = bot.pathfinder?.goal;
+                if (activeGoal && bot.pathfinder) {
+                  // Re-path from new stance without rejecting promises or stopping pathfinder
+                  bot.pathfinder.setGoal(activeGoal, true);
+                }
               }
-            }, 350);
-          } else if (stuckCounter >= 6) {
-            // Hard stuck: full reset
+            }, 250);
+          } else if (stuckCounter >= 12) {
+            // Tier 5 (~6.0s): Persistent hard-stuck fail-safe
+            console.log('[Zoltraak Nav] Obstacle impassable after recovery attempts. Resetting pathfinder state cleanly.');
             bot.clearControlStates();
-            bot.pathfinder.stop();
+            try {
+              bot.pathfinder.stop();
+            } catch (e) {}
             stuckCounter = 0;
             lastPos = null;
           }
@@ -112,51 +186,66 @@ function setupMovements(bot, mcData, config = {}) {
 }
 
 // ============================================================
-// Guard Follow — Dynamic GoalFollow with sprint-on-distance
+// Unified Follow Engine (Follow & Guard Modes)
 // ============================================================
-// Updates GoalFollow position every 600ms, enables sprinting
-// when the player is far, and stops sprinting when close.
-function startGuardFollow(ctx, targetPlayer) {
-  stopGuardFollow(); // Kill any existing guard interval first
+function startFollow(ctx, targetPlayer, mode = 'FOLLOW') {
+  stopFollow(); // Clear any existing follow interval
 
-  const { bot, config } = ctx;
+  const { bot, config, state } = ctx;
   const followDist = config.navigation?.followDistance || 2;
-  const sprintThreshold = 6; // Distance (blocks) at which to start sprinting
+  const sprintThreshold = 6;
 
-  guardFollowInterval = setInterval(() => {
-    if (!bot || !bot.entity || !targetPlayer || !targetPlayer.isValid) return;
-    if (ctx.state?.currentState !== 'GUARD') {
-      stopGuardFollow();
+  followInterval = setInterval(() => {
+    if (!bot || !bot.entity || !targetPlayer || !targetPlayer.isValid) {
+      stopFollow();
+      return;
+    }
+
+    // Stop if the bot's state changed away from the expected follow mode
+    if (state && state.currentState !== mode) {
+      stopFollow();
       return;
     }
 
     const dist = bot.entity.position.distanceTo(targetPlayer.position);
 
-    // Distance-adaptive sprinting
-    if (dist > sprintThreshold) {
+    // Distance-adaptive sprinting (only sprint if hunger allows)
+    const canSprint = bot.food === undefined || bot.food > 6;
+    if (dist > sprintThreshold && canSprint) {
       bot.setControlState('sprint', true);
-    } else if (dist <= followDist + 1) {
+    } else if (dist <= followDist + 1.2) {
       bot.setControlState('sprint', false);
     }
 
-    // Refresh the goal position so pathfinder re-routes around new obstacles
+    // Refresh goal to dynamically adjust to target's movement
     bot.pathfinder.setGoal(new goals.GoalFollow(targetPlayer, followDist), true);
 
-    // If player is way too far (disconnected area / teleport) — stop sprinting
-    // to avoid resource waste and let pathfinder recalculate cleanly
-    if (dist > 60) {
-      console.log('[Zoltraak Guard] Owner very far away — holding position.');
+    // Teleport / extreme distance failsafe
+    if (dist > 64) {
+      console.log(`[Zoltraak ${mode}] Target player too far (${Math.round(dist)}m) — holding position.`);
       bot.pathfinder.setGoal(null);
       bot.clearControlStates();
     }
   }, 600);
 }
 
-function stopGuardFollow() {
+function stopFollow() {
+  if (followInterval) {
+    clearInterval(followInterval);
+    followInterval = null;
+  }
   if (guardFollowInterval) {
     clearInterval(guardFollowInterval);
     guardFollowInterval = null;
   }
+}
+
+function startGuardFollow(ctx, targetPlayer) {
+  return startFollow(ctx, targetPlayer, 'GUARD');
+}
+
+function stopGuardFollow() {
+  return stopFollow();
 }
 
 // ============================================================
@@ -187,7 +276,10 @@ function performLifeLikeRoaming(ctx) {
 
 module.exports = {
   setupMovements,
+  startFollow,
+  stopFollow,
   startGuardFollow,
   stopGuardFollow,
   performLifeLikeRoaming
 };
+

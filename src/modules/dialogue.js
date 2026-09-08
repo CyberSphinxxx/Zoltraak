@@ -60,8 +60,8 @@ function isAddressedToBot(ctx, username, message, isWhisper) {
   const GREETING_WORDS = ['hi', 'hey', 'yo', 'sup', 'hello', 'o/', 'morning', 'heyy'];
   const isGreeting = GREETING_WORDS.includes(lower.replace(/[!.,?]/g, '').trim());
 
-  if (isGreeting && bot.players[username]?.entity) {
-    const playerEnt = bot.players[username].entity;
+  const playerEnt = bot.players[username]?.entity;
+  if (isGreeting && playerEnt && playerEnt.position && bot.entity?.position) {
     const dist = bot.entity.position.distanceTo(playerEnt.position);
 
     if (dist <= 4.0) {

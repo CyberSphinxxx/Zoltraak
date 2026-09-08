@@ -1,4 +1,4 @@
-const { stopGuardFollow } = require('./modules/navigation');
+const { stopFollow } = require('./modules/navigation');
 
 let activeIntervals = [];
 
@@ -7,7 +7,7 @@ function stopAutonomousLoops() {
     clearInterval(interval);
   }
   activeIntervals = [];
-  stopGuardFollow(); // Always kill guard follow on full loop stop
+  stopFollow(); // Always kill follow loops on full loop stop
 }
 
 function startAutonomousLoops(ctx) {
@@ -30,11 +30,14 @@ function startAutonomousLoops(ctx) {
   }, 8000);
   activeIntervals.push(i1);
 
-  // 2. Active Food Consumer every 3 seconds
+  // 2. Active Food Consumer every 3 seconds & Sprint Safety Check
   const iEat = setInterval(() => {
     if (!bot || !bot.entity || state.isSleeping) return;
     if (bot.food < 18) {
       ctx.eatIfHungry();
+    }
+    if (bot.pathfinder?.movements) {
+      bot.pathfinder.movements.allowSprinting = bot.food === undefined || bot.food > 6;
     }
   }, 3000);
   activeIntervals.push(iEat);

@@ -1,5 +1,5 @@
 const { goals } = require('mineflayer-pathfinder');
-const { startGuardFollow, stopGuardFollow } = require('./modules/navigation');
+const { startFollow, stopFollow, startGuardFollow, stopGuardFollow } = require('./modules/navigation');
 
 const COMMAND_NAMES = [
   'come', 'follow', 'guard', 'bodyguard', 'stay', 'stop', 'roam',
@@ -60,13 +60,13 @@ function handleCommand(ctx, username, message, isWhisper = false) {
     case 'come':
     case 'follow': {
       const player = bot.players[username]?.entity;
-      if (!player) {
+      if (!player || !player.position) {
         reply('where are you?');
         return true;
       }
       state.currentState = 'FOLLOW';
       state.followTarget = player;
-      bot.pathfinder.setGoal(new goals.GoalFollow(player, followDist), true);
+      startFollow(ctx, player, 'FOLLOW');
       const followReplies = ['k', 'coming', 'on my way', 'gotchu'];
       reply(followReplies[Math.floor(Math.random() * followReplies.length)]);
       break;
@@ -75,7 +75,7 @@ function handleCommand(ctx, username, message, isWhisper = false) {
     case 'guard':
     case 'bodyguard': {
       const player = bot.players[username]?.entity;
-      if (!player) {
+      if (!player || !player.position) {
         reply('where are you?');
         return true;
       }
@@ -90,7 +90,7 @@ function handleCommand(ctx, username, message, isWhisper = false) {
     case 'stop': {
       state.currentState = 'IDLE';
       state.followTarget = null;
-      stopGuardFollow();
+      stopFollow();
       bot.pathfinder.setGoal(null);
       bot.pvp.stop();
       if (bot.clearControlStates) bot.clearControlStates();
@@ -107,6 +107,10 @@ function handleCommand(ctx, username, message, isWhisper = false) {
     }
 
     case 'sethome': {
+      if (!bot || !bot.entity || !bot.entity.position) {
+        reply('cannot set home right now (not spawned)');
+        break;
+      }
       state.homePos = bot.entity.position.clone();
       config.home = { x: Math.round(state.homePos.x), y: Math.round(state.homePos.y), z: Math.round(state.homePos.z) };
       ctx.saveConfig();
@@ -169,7 +173,8 @@ function handleCommand(ctx, username, message, isWhisper = false) {
 
     case 'tunnel':
     case 'stripminer': {
-      const steps = parseInt(args[1], 10) || 8;
+      const rawSteps = parseInt(args[1], 10);
+      const steps = (!isNaN(rawSteps) && rawSteps > 0) ? Math.min(64, rawSteps) : 8;
       state.currentState = 'MINING';
       reply(`excavating 1x2 tunnel (${steps} blocks)...`);
       ctx.digTunnel(steps);
@@ -214,7 +219,11 @@ function handleCommand(ctx, username, message, isWhisper = false) {
     case 'addpatrol':
     case 'addpoint': {
       const player = bot.players[username]?.entity;
-      const targetPos = player ? player.position : bot.entity.position;
+      const targetPos = player?.position || bot.entity?.position;
+      if (!targetPos) {
+        reply('cannot determine waypoint position (not spawned or player not found)');
+        break;
+      }
       const total = ctx.addPatrolWaypoint(targetPos);
       reply(`waypoint #${total} recorded at ${Math.round(targetPos.x)}, ${Math.round(targetPos.z)}`);
       break;
@@ -228,7 +237,8 @@ function handleCommand(ctx, username, message, isWhisper = false) {
 
     case 'craft': {
       const itemToCraft = args[1];
-      const count = parseInt(args[2], 10) || 1;
+      const rawCount = parseInt(args[2], 10);
+      const count = (!isNaN(rawCount) && rawCount > 0) ? Math.min(64, rawCount) : 1;
       if (!itemToCraft) {
         reply('usage: !craft <item_name> [count]');
         return true;
@@ -247,7 +257,8 @@ function handleCommand(ctx, username, message, isWhisper = false) {
     case 'bring':
     case 'deliver': {
       const itemToDeliver = args[1];
-      const count = parseInt(args[2], 10) || 1;
+      const rawCount = parseInt(args[2], 10);
+      const count = (!isNaN(rawCount) && rawCount > 0) ? Math.min(64, rawCount) : 1;
       if (!itemToDeliver) {
         reply('usage: !bring <item_name> [count]');
         return true;
@@ -289,15 +300,16 @@ function handleCommand(ctx, username, message, isWhisper = false) {
     }
 
     case 'status': {
-      const hp = Math.round(bot.health);
-      const food = Math.round(bot.food);
+      const hp = (bot.health !== undefined && bot.health !== null) ? Math.round(bot.health) : 20;
+      const food = (bot.food !== undefined && bot.food !== null) ? Math.round(bot.food) : 20;
       const waypoints = state.patrolWaypoints ? state.patrolWaypoints.length : 0;
       reply(`hp: ${hp}/20 | food: ${food}/20 | mode: ${state.currentState.toLowerCase()} | patrol pts: ${waypoints}`);
       break;
     }
 
     case 'bridge': {
-      const length = parseInt(args[1], 10) || 8;
+      const rawLen = parseInt(args[1], 10);
+      const length = (!isNaN(rawLen) && rawLen > 0) ? Math.min(64, rawLen) : 8;
       const dir = args[2] || 'forward';
       ctx.bridge(length, dir, true, username);
       break;
@@ -305,7 +317,8 @@ function handleCommand(ctx, username, message, isWhisper = false) {
 
     case 'tower':
     case 'scaffold': {
-      const height = parseInt(args[1], 10) || 5;
+      const rawH = parseInt(args[1], 10);
+      const height = (!isNaN(rawH) && rawH > 0) ? Math.min(32, rawH) : 5;
       ctx.tower(height, true, username);
       break;
     }

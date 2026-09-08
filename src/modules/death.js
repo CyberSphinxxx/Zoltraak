@@ -30,6 +30,12 @@ async function recoverCorpse(ctx, isWhisper = true, targetPlayer = null) {
     return;
   }
 
+  const currentDim = (bot.game && bot.game.dimension) ? bot.game.dimension : 'overworld';
+  if (state.deathDimension && state.deathDimension !== currentDim) {
+    ctx.sendReply(`I died in ${state.deathDimension}, but I am currently in ${currentDim}! I need to travel through a portal first.`, isWhisper, targetPlayer);
+    return;
+  }
+
   state.isRetrieving = true;
   const prev = state.currentState;
   state.currentState = 'RETRIEVING';
@@ -57,10 +63,10 @@ async function recoverCorpse(ctx, isWhisper = true, targetPlayer = null) {
   } catch (err) {
     console.log('[Zoltraak Death] Recovery path error: ' + err.message);
     ctx.sendReply('Encountered an obstacle reaching the death location.', isWhisper, targetPlayer);
+  } finally {
+    state.isRetrieving = false;
+    state.currentState = prev === 'RETRIEVING' ? 'ROAM' : prev;
   }
-
-  state.isRetrieving = false;
-  state.currentState = prev === 'RETRIEVING' ? 'ROAM' : prev;
 }
 
 module.exports = {

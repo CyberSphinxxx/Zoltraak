@@ -27,7 +27,7 @@ function isMatureCrop(block) {
 async function checkAndFarmCrops(ctx, mcData) {
   const { bot, state, config } = ctx;
   if (!bot || state.isFarming) return;
-  if (['COMBAT', 'DEPOSITING', 'GUARD', 'FISHING'].includes(state.currentState)) return;
+  if (state.currentState !== 'FARM' && state.currentState !== 'ROAM') return;
 
   const data = mcData || ctx.mcData;
   if (!data) return;
@@ -109,10 +109,12 @@ async function checkAndFarmCrops(ctx, mcData) {
       ctx.eatIfHungry();
     }
 
-    // Continue to next available crop smoothly
+    // Continue to next available crop smoothly if still in FARM or ROAM mode
     setTimeout(() => {
       state.isFarming = false;
-      checkAndFarmCrops(ctx, data);
+      if (state.currentState === 'FARM' || state.currentState === 'ROAM') {
+        checkAndFarmCrops(ctx, data);
+      }
     }, 400);
 
   } catch (err) {

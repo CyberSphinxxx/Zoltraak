@@ -12,7 +12,7 @@ async function breedAnimals(ctx, speciesFilter = 'all') {
   const { bot, state } = ctx;
   if (!bot || !bot.entity || state.isBreeding) return false;
 
-  const targetSpecies = speciesFilter.toLowerCase();
+  const targetSpecies = (speciesFilter || 'all').toLowerCase();
   const validSpecies = Object.keys(BREEDING_FOODS);
 
   const eligibleSpecies = validSpecies.filter(species => {
@@ -75,10 +75,10 @@ async function breedAnimals(ctx, speciesFilter = 'all') {
     }
   } catch (err) {
     console.log('[Zoltraak Rancher] Error: ' + err.message);
+  } finally {
+    state.isBreeding = false;
+    state.currentState = prev === 'RANCHING' ? 'ROAM' : prev;
   }
-
-  state.isBreeding = false;
-  state.currentState = prev === 'RANCHING' ? 'ROAM' : prev;
   return true;
 }
 

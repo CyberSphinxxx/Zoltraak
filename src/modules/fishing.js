@@ -38,6 +38,16 @@ async function startFishingLoop(ctx, isWhisper = true, targetPlayer = null) {
 
     while (state.currentState === 'FISHING') {
       try {
+        rod = bot.inventory.items().find(i => i.name === 'fishing_rod');
+        if (!rod) {
+          rod = await ctx.fetchToolFromChest('fishing_rod');
+          if (!rod) {
+            ctx.sendReply('Fishing rod broke and no replacement found in storage.', isWhisper, targetPlayer);
+            state.currentState = 'ROAM';
+            break;
+          }
+        }
+
         await bot.equip(rod, 'hand');
         await bot.lookAt(waterBlock.position.offset(0.5, 0.8, 0.5));
         await bot.fish();
@@ -54,9 +64,9 @@ async function startFishingLoop(ctx, isWhisper = true, targetPlayer = null) {
     }
   } catch (err) {
     console.log('[Zoltraak] Fishing error: ' + err.message);
+  } finally {
+    state.isFishing = false;
   }
-
-  state.isFishing = false;
 }
 
 module.exports = {
